@@ -3,6 +3,10 @@
 ## Objective
 Inspired by the several Auto-GPT related Projects (predominently BabyAGI) and the Paper ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442), this python project uses OpenAI and Pinecone to Give memory to an AI agent and also allows it to "think" before making an action (outputting text). Also, just by shutting down the AI, it doesn't forget its memories since it lives on Pinecone and its memory_counter saves the index that its on.
 
+
+## Updates
+April 12: Added "read" and "think" commands. Add "read: " or "think: " in front of a query to feed it information using read (any length works) or insert a memory into agent.
+
 ### Sections
 - [How it Works](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-it-works)
 - [How to Use](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-to-use)
