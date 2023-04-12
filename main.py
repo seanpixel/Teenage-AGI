@@ -17,11 +17,14 @@ print("Talk to the AI!")
 
 while True:
     userInput = input()
-    if (userInput.startswith("read:")):
-        agent.read(" ".join(userInput.split(" ")[1:]))
-        print("Understood! The information is stored in my memory.")
-    elif (userInput.startswith("think:")):
-        agent.think(" ".join(userInput.split(" ")[1:]))
-        print("Understood! I stored that thought into my memory.")
+    if userInput:
+        if (userInput.startswith("read:")):
+            agent.read(" ".join(userInput.split(" ")[1:]))
+            print("Understood! The information is stored in my memory.")
+        elif (userInput.startswith("think:")):
+            agent.think(" ".join(userInput.split(" ")[1:]))
+            print("Understood! I stored that thought into my memory.")
+        else:
+            print(agent.action(userInput), "\n")
     else:
-        print(agent.action(userInput), "\n")
+        print("SYSTEM - Give a valid input")
