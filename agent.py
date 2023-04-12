@@ -7,10 +7,11 @@ from dotenv import load_dotenv
 # Load default environment variables (.env)
 load_dotenv()
 
+OPENAI_MODEL = os.getenv("OPENAI_MODEL") or "gpt-4"
 
 def generate(prompt):
     completion = openai.ChatCompletion.create(
-    model="gpt-4",
+    model=OPENAI_MODEL,
     messages=[
         {"role": "system", "content": "You are an intelligent agent with thoughts and memories. You have a memory which stores your past thoughts and actions and also how other users have interacted with you."},
         {"role": "system", "content": "Keep your thoughts relatively simple and concise"},
