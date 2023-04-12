@@ -102,10 +102,7 @@ class Agent():
 	    namespace=THOUGHTS,
         )
 
-        # print(f"thought-{self.thought_id_count}")
-        # print(self.memory.fetch(ids=[f"thought-{self.thought_id_count}"]))
         self.thought_id_count += 1
-        #print("thought_id:", str(thought_id))
 
     # Agent thinks about given query based on top k related memories. Internal thought is passed to external thought
     def internalThought(self, query) -> str:
@@ -145,7 +142,7 @@ class Agent():
         self.updateMemory(request_memory.replace("{query}", query), "Query")
         return external_thought
     
-    # Make agent read some information
+    # Make agent read some information (learn) WIP
     def read(self, text) -> str:
         pass
 
