@@ -3,6 +3,11 @@ import os
 import pinecone
 import yaml
 from dotenv import load_dotenv
+import nltk
+from langchain.text_splitter import NLTKTextSplitter
+
+# Download NLTK for Reading
+nltk.download('punkt')
 
 # Load default environment variables (.env)
 load_dotenv()
