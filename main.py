@@ -17,4 +17,8 @@ print("Talk to the AI!")
 
 while True:
     userInput = input()
-    print("\n", agent.action(userInput))
+    if (userInput.startswith("read:")):
+        agent.read(userInput[1:])
+        print("Understood! The information is stored in my memory.")
+    else:
+        print("\n", agent.action(userInput))
