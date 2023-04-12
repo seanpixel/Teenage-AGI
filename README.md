@@ -22,8 +22,9 @@ Here is what happens everytime the AI is queried by the user:
 ## How to Use
 1. Clone the repository via `git clone https://github.com/seanpixel/Teenage-AGI.git` and cd into the cloned repository.
 2. Install required packages by doing: pip install -r requirements.txt
-3. Set your OpenAI and Pinecone API info in the OPENAI_API_KEY, PINECONE_API_KEY, and PINECONE_API_ENV variables.
-4. Run `python main.py` and talk to the AI in the terminal
+3. Create a .env file from the template `cp .env.template .env`
+4. `open .env` and set your OpenAI and Pinecone API info.
+5. Run `python main.py` and talk to the AI in the terminal
 
 ## Running in a docker container
 You can run the system isolated in a container using docker-compose:
