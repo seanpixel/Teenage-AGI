@@ -1,0 +1,36 @@
+# Prompts to generate internal and external thoughts based on top relevant memories
+internal_thought: |-
+  You have been given the following input: {query}. 
+  You must think about it and plan what action to take.
+  For some context, here are your memories related to the query.
+   
+  MEMORIES sorted in relevance:
+  {top_matches}
+
+  Think of some actions you would take after hearing "{query}" based on your past thoughts and actions.
+  This is not shown to the outside world but only to yourself. It is just your internal thought."
+
+external_thought: |-
+  MEMORIES sorted in relevance:
+  {top_matches}
+
+  Based on the query, you have thought about the input and had the following thought: 
+  
+  {internal_thought}. 
+
+  Based on your thought and memories, respond to the query. You don't have to refer to them if they aren't useful.
+  {query}"
+
+# Prompts to create memories
+request_memory: |-
+  The user said to you:
+  '{query}'
+
+internal_thought_memory: |-
+  Based on the query "{query}", you thought:
+   '{internal_thought}'
+
+external_thought_memory: |-
+  Based on the query "{query}", you responded with:
+   '{external_thought}'
+
