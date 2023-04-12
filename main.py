@@ -1,8 +1,9 @@
 import agent
 from agent import Agent
 
-agent = Agent("agent2")
+agent = Agent("myAgent")
 
+# Creates Pinecone Index
 agent.createIndex()
 
 print("Talk to the AI!")
