@@ -22,8 +22,8 @@ def generate(prompt):
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-#PINECONE_API_ENV = os.getenv("PINECONE_API_ENV")
-PINECONE_API_ENV = "asia-southeast1-gcp"
+PINECONE_API_ENV = os.getenv("PINECONE_API_ENV")
+#PINECONE_API_ENV = "asia-southeast1-gcp"
     
 # Prompt Initialization
 with open('prompts.yaml', 'r') as f:
