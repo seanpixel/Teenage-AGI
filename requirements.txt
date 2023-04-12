@@ -1,0 +1,5 @@
+openai==0.27.2
+pinecone==0.1.0
+pinecone_client==2.2.1
+python-dotenv==1.0.0
+PyYAML==6.0
