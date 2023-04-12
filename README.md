@@ -16,7 +16,7 @@ Here is what happens everytime the AI is queried by the user:
 2. AI looks inside its memory and finds memories and past queries that are relevant to the current query
 3. AI thinks about what action to take
 4. AI stores the thought from Step 3
-5. Based on the thought from Step 3 and relevant memories, AI generates an output
+5. Based on the thought from Step 3 and relevant memories from Step 2, AI generates an output
 6. AI stores the current query and its answer in its Pinecone vector database memory
 
 ## How to Use
