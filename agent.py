@@ -174,26 +174,6 @@ class Agent():
         self.updateMemory(request_memory.replace("{query}", query), QUERIES)
         self.last_message = query
         return external_thought
-    
-    # Make agent read some information
-    def read(self, text) -> str:
-        texts = text_splitter.split_text(text)
-        vectors = []
-        for t in texts:
-            vector = get_ada_embedding(t)
-            vectors.append({
-                'id':f"thought-{self.thought_id_count}", 
-                'values':vector, 
-                'metadata':
-                    {"thought_string": t, 
-                     }
-                })
-            self.thought_id_count += 1
-
-        upsert_response = self.memory.upsert(
-        vectors,
-	    namespace=THOUGHTS, # Might change to something like "information" later
-        )
 
     # Make agent think some information
     def think(self, text) -> str:
