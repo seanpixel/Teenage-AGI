@@ -25,6 +25,12 @@ Here is what happens everytime the AI is queried by the user:
 3. Set your OpenAI and Pinecone API info in the OPENAI_API_KEY, PINECONE_API_KEY, and PINECONE_API_ENV variables.
 4. Run `python main.py` and talk to the AI in the terminal
 
+## Running in a docker container
+You can run the system isolated in a container using docker-compose:
+```
+docker-compose run teenage-agi
+```
+
 ## Experiments
 Currently, using GPT-4, I found that it can remember its name and other characteristics. It also carries on the conversation quite well without a context window (although I might add it soon). I will update this section as I keep playing with it.
 
