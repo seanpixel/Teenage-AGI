@@ -60,6 +60,7 @@ class Agent():
         self.table_name = table_name
         self.memory = None
         self.thought_id_count = int(counter['count'])
+	self.last_message = ""
 
     # Keep Remebering!
     # def __del__(self) -> None:
@@ -143,11 +144,28 @@ class Agent():
         self.updateMemory(externalMemoryPrompt, "External")
         request_memory = data["request_memory"]
         self.updateMemory(request_memory.replace("{query}", query), "Query")
+	self.last_message = query
         return external_thought
     
-    # Make agent read some information (learn) WIP
+    # Make agent read some information
     def read(self, text) -> str:
-        pass
+        texts = text_splitter.split_text(text)
+        vectors = []
+        for t in texts:
+            vector = get_ada_embedding(t)
+            vectors.append({
+                'id':f"thought-{self.thought_id_count}", 
+                'values':vector, 
+                'metadata':
+                    {"thought_string": t, 
+                    "thought_type": "information"}
+                })
+            self.thought_id_count += 1
+
+        upsert_response = self.memory.upsert(
+        vectors,
+	    namespace=THOUGHTS, # Might change to something like "information" later
+        )
 
 
 
