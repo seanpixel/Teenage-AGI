@@ -5,7 +5,6 @@ agent = Agent("agent2")
 
 agent.createIndex()
 
-#print("\n", agent.action("Hey, How are you doing?"))
 print("Talk to the AI!")
 
 while True:
