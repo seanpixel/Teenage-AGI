@@ -1,7 +1,18 @@
-# Teenage-AGI
+# Teenage-AGI-Chef
+
+Teenage-AGI-Chef is a Python-based AGI (artificial general intelligence) project that recommends food choices based on a user's goals and preferences, and can modify its recommendations based on user feedback. The project is built on top of an existing AGI project that uses OpenAI and Pinecone to give memory to the AI agent, and allows it to "think" before making an action (outputting text).
+
+In the modified version, which we can call "Teenage-AGI-Chef", the original project has been adapted to focus on food recommendations. The AI agent now has the ability to suggest meal options based on a user's specified goal, such as a fast meal, a tasty meal, or a healthy meal. It also has the ability to retrieve a list of restaurants from Google Maps and suggest matching food options based on the user's preferences.
+
+Overall, Teenage-AGI-Chef is a practical application of AGI technology that has the potential to help users make informed food choices based on their goals and preferences.
+
+Credits: 
+Teenage AGI -> https://github.com/seanpixel/Teenage-AGI
+Baby AGI -> https://github.com/yoheinakajima/babyagi
+
 
 ## Objective
-Inspired by the several Auto-GPT related Projects (predominently BabyAGI) and the Paper ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442), this python project uses OpenAI and Pinecone to Give memory to an AI agent and also allows it to "think" before making an action (outputting text). Also, just by shutting down the AI, it doesn't forget its memories since it lives on Pinecone and its memory_counter saves the index that its on.
+Inspired by the several Auto-GPT related Projects (predominently BabyAGI) and the Paper ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442), the original python project uses OpenAI and Pinecone to Give memory to an AI agent and also allows it to "think" before making an action (outputting text). Also, just by shutting down the AI, it doesn't forget its memories since it lives on Pinecone and its memory_counter saves the index that its on.
 
 ### Sections
 - [How it Works](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-it-works)
