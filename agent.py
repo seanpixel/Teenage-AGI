@@ -29,10 +29,10 @@ def generate(prompt):
 
     return completion.choices[0].message["content"]
 
-PINECONE_API_KEY = "9d6551cc-2324-4094-be8f-a0df9d7c0492"
-OPENAI_API_KEY = "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"
-#PINECONE_API_ENV = os.getenv("PINECONE_API_ENV")
-PINECONE_API_ENV = "asia-southeast1-gcp"
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+PINECONE_API_ENV = os.getenv("PINECONE_API_ENV")
+#PINECONE_API_ENV = "asia-southeast1-gcp"
     
 # Prompt Initialization
 with open('prompts.yaml', 'r') as f:
