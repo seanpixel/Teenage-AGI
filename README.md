@@ -7,7 +7,7 @@ Inspired by the several Auto-GPT related Projects (predominently BabyAGI) and th
 - [How it Works](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-it-works)
 - [How to Use](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-to-use)
 - [Experiments](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#experiments)
-- [More About Project & Me](- [How to Use](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-to-use))
+- [More About Project & Me](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-to-use)
 - [Credits](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#credits)
 
 ## How it Works
