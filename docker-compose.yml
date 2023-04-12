@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  teenage-agi:
+    build: ./
+    volumes:
+      - "./:/app"
+    profiles: ["exclude-from-up"] # Use `docker-compose run teenage-agi` to get an attached container
