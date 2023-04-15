@@ -15,7 +15,7 @@ text_splitter = NLTKTextSplitter(chunk_size=2500)
 # Load default environment variables (.env)
 load_dotenv()
 
-OPENAI_MODEL = os.getenv("OPENAI_MODEL") or "gpt-4"
+OPENAI_MODEL = os.getenv("OPENAI_MODEL") or "gpt-3.5-turbo"
 
 def generate(prompt):
     completion = openai.ChatCompletion.create(

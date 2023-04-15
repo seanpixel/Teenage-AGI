@@ -2,7 +2,12 @@ version: "3.9"
 
 services:
   teenage-agi:
-    build: ./
+    build:
+      context: ./
+      args:
+        - API_ENABLED
     volumes:
       - "./:/app"
     profiles: ["exclude-from-up"] # Use `docker-compose run teenage-agi` to get an attached container
+    ports:
+      - "8000:8000"
