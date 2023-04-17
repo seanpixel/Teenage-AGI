@@ -65,7 +65,7 @@ async def data_request(request_data: Payload) -> dict:
         "{factor_3}", json_payload["factor_3"]).replace("{factor_2_option}",
                                                                                     json_payload["factor_2_option"] ).replace(
         "{factor_3_option}", json_payload["factor_3_option"])
-    print("here is the request data", json_payload["query"])
+    # print("here is the request data", json_payload["query"])
     agent_instance = establish_connection()
     agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
     # # response_data = process_request_data(request_data.dict())
