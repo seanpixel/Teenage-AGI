@@ -1,4 +1,19 @@
 # Prompts to generate internal and external thoughts based on top relevant memories
+default_query: |-
+  Hey ChatGPT, I need your help choosing what to eat for my next meal. 
+  There are three factors I want to consider: "{factor_1}", "{factor_2}", and "{factor_3}". For time, I have "{factor_1}" to prepare and eat my meal. 
+  For "{factor_2}", I want "{factor_2_option}". 
+  Finally, for "{factor_3}", I want "{factor_3_option}".
+  When you are inquisitive mode, I want you to suggest me something based on these three factors. 
+  However, I want you to make six assumptions that would allow you to come up with one suggestion for me. 
+  These assumptions should take into account my preferences for time, price, and health, as well as other factors you think are relevant. 
+  They should be very short, be very specific. I have cooking skills and access to basic cooking equipment, it should not be an assumption. 
+  If flavors and cuisines are mentioned, one cuisine should be chosen based on ChatGPT preferences without stating it's ChatGPT favourite. 
+  If there is an assumption about ingredients, they should be listed very specifically. 
+  Assumptions should start with "Assumptions:" and be shown as a list, the result should start with "Result:" and be shown as a list.  
+  List another 6 assumptions user might want to include with "Potential Assumptions:" 
+  Summarize with one word at the top starting with "Result type" what kind of result you are offering
+
 internal_thought: |-
   You have been given the following input: {query}. 
   You must think about it and plan what action to take.

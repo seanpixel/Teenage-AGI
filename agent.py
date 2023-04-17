@@ -5,7 +5,7 @@ import yaml
 from dotenv import load_dotenv
 import nltk
 from langchain.text_splitter import NLTKTextSplitter
-
+from typing import Optional
 # Download NLTK for Reading
 nltk.download('punkt')
 
@@ -70,8 +70,10 @@ def get_ada_embedding(text):
 
 
 class Agent():
-    def __init__(self, table_name=None) -> None:
+    def __init__(self, table_name=None, user_id: Optional[str] = "123", session_id: Optional[str] = None) -> None:
         self.table_name = table_name
+        self.user_id = user_id
+        self.session_id = session_id
         self.memory = None
         self.thought_id_count = int(counter['count'])
         self.last_message = ""
@@ -81,6 +83,9 @@ class Agent():
     #     with open('memory_count.yaml', 'w') as f:
     #         yaml.dump({'count': str(self.thought_id_count)}, f)
     
+    def set_user_session(self, user_id: str, session_id: str) -> None:
+        self.user_id = user_id
+        self.session_id = session_id
 
     def createIndex(self, table_name=None):
         # Create Pinecone index
@@ -126,7 +131,7 @@ class Agent():
             'id':f"thought-{self.thought_id_count}", 
             'values':vector, 
             'metadata':
-                {"thought_string": new_thought
+                {"thought_string": new_thought, "user_id": self.user_id
                 }
             }],
 	    namespace=thought_type,
@@ -191,7 +196,7 @@ class Agent():
                 'id':f"thought-{self.thought_id_count}", 
                 'values':vector, 
                 'metadata':
-                    {"thought_string": t, 
+                    {"thought_string": t, "user_id": self.user_id
                      }
                 })
             self.thought_id_count += 1
