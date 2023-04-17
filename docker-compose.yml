@@ -22,7 +22,7 @@ services:
     image: postgres:14-alpine
     container_name: "agi_db"
     networks:
-      - backend
+      - agi_backend
     ports:
       - "65432:5432"
     environment:
@@ -32,5 +32,5 @@ services:
     volumes:
       - ./initdb:/docker-entrypoint-initdb.d
 networks:
-  backend:
+  agi_backend:
     name: agi_backend
