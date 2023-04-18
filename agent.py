@@ -2,13 +2,14 @@ import openai
 import os
 import pinecone
 import yaml
+import time
 from dotenv import load_dotenv
 import nltk
 from langchain.text_splitter import NLTKTextSplitter
 from typing import Optional
 # Download NLTK for Reading
 nltk.download('punkt')
-
+import subprocess
 # Initialize Text Splitter
 text_splitter = NLTKTextSplitter(chunk_size=2500)
 
@@ -17,17 +18,55 @@ load_dotenv()
 
 OPENAI_MODEL = os.getenv("OPENAI_MODEL") or "gpt-3.5-turbo"
 
-def generate(prompt):
-    completion = openai.ChatCompletion.create(
-    model=OPENAI_MODEL,
-    messages=[
-        {"role": "system", "content": "You are an intelligent agent with thoughts and memories. You have a memory which stores your past thoughts and actions and also how other users have interacted with you."},
-        {"role": "system", "content": "Keep your thoughts relatively simple and concise"},
-        {"role": "user", "content": prompt},
-        ]
-    )
+OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", 0.0))
+def openai_call(
+    prompt: str,
+    model: str = OPENAI_MODEL,
+    temperature: float = OPENAI_TEMPERATURE,
+    max_tokens: int = 100,
+):
+    while True:
+        try:
+            if model.startswith("llama"):
+                # Spawn a subprocess to run llama.cpp
+                cmd = ["llama/main", "-p", prompt]
+                result = subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.PIPE, text=True)
+                return result.stdout.strip()
+            else:
+                # Use chat completion API
+                messages=[
+                    {"role": "system", "content": "You are an intelligent agent with thoughts and memories. You have a memory which stores your past thoughts and actions and also how other users have interacted with you."},
+                    {"role": "system", "content": "Keep your thoughts relatively simple and concise"},
+                    {"role": "user", "content": prompt},
+                    ]
+                response = openai.ChatCompletion.create(
+                    model=model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    n=1,
+                    stop=None,
+                )
+                return response.choices[0].message.content
+        except openai.error.RateLimitError:
+            print(
+                "The OpenAI API rate limit has been exceeded. Waiting 10 seconds and trying again."
+            )
+            time.sleep(10)  # Wait 10 seconds and try again
+        else:
+            break
 
-    return completion.choices[0].message["content"]
+# def generate(prompt):
+#     completion = openai.ChatCompletion.create(
+#     model=OPENAI_MODEL,
+#     messages=[
+#         {"role": "system", "content": "You are an intelligent agent with thoughts and memories. You have a memory which stores your past thoughts and actions and also how other users have interacted with you."},
+#         {"role": "system", "content": "Keep your thoughts relatively simple and concise"},
+#         {"role": "user", "content": prompt},
+#         ]
+#     )
+#
+#     return completion.choices[0].message["content"]
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -153,7 +192,7 @@ class Agent():
         internalThoughtPrompt = internalThoughtPrompt.replace("{query}", query).replace("{top_matches}", top_matches).replace("{last_message}", self.last_message)
         print("------------INTERNAL THOUGHT PROMPT------------")
         print(internalThoughtPrompt)
-        internal_thought = generate(internalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
+        internal_thought = openai_call(internalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
         
         # Debugging purposes
         #print(internal_thought)
@@ -170,7 +209,7 @@ class Agent():
         externalThoughtPrompt = externalThoughtPrompt.replace("{query}", query).replace("{top_matches}", top_matches).replace("{internal_thought}", internal_thought).replace("{last_message}", self.last_message)
         print("------------EXTERNAL THOUGHT PROMPT------------")
         print(externalThoughtPrompt)
-        external_thought = generate(externalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
+        external_thought = openai_call(externalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
 
         externalMemoryPrompt = data['external_thought_memory']
         externalMemoryPrompt = externalMemoryPrompt.replace("{query}", query).replace("{external_thought}", external_thought)
