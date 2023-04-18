@@ -181,8 +181,8 @@ class Agent():
     # Agent thinks about given query based on top k related memories. Internal thought is passed to external thought
     def internalThought(self, query) -> str:
         query_embedding = get_ada_embedding(query)
-        query_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=QUERIES)
-        thought_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=THOUGHTS)
+        query_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=QUERIES, filter={'user_id': {'$in': [self.user_id]}})
+        thought_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=THOUGHTS, filter={'user_id': {'$in': [self.user_id]}})
         results = query_results.matches + thought_results.matches
         sorted_results = sorted(results, key=lambda x: x.score, reverse=True)
         top_matches = "\n\n".join([(str(item.metadata["thought_string"])) for item in sorted_results])
