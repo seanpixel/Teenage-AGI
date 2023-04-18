@@ -54,6 +54,28 @@ class ImageResponse(BaseModel):
 #     message = "Images uploaded and processed successfully." if success else "Failed to process images."
 #     return ImageResponse(success=success, message=message)
 import json
+@app.post("/variate-assumption", response_model=dict)
+async def data_request(request_data: Payload) -> dict:
+
+    json_payload = request_data.payload
+
+    # print("here is the request data", json_payload["query"])
+    agent_instance = establish_connection()
+    agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    # # response_data = process_request_data(request_data.dict())
+    # q = json.loads(request_data.query)
+    # logging.info("HERE IS THE QUERY", q)
+    # query = q.get("query")
+    output = agent_instance.action(str(json_payload['variate_assumption']))
+    return {"response": output}
+@app.post("/variate-goal", response_model=dict)
+async def data_request(request_data: Payload) -> dict:
+
+    json_payload = request_data.payload
+    agent_instance = establish_connection()
+    agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent_instance.action(str(json_payload['variate_goal']))
+    return {"response": output}
 @app.post("/data-request", response_model=dict)
 async def data_request(request_data: Payload) -> dict:
     with open('prompts.yaml', 'r') as f:
