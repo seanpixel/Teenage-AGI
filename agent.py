@@ -10,6 +10,7 @@ from typing import Optional
 # Download NLTK for Reading
 nltk.download('punkt')
 import subprocess
+import datetime
 # Initialize Text Splitter
 text_splitter = NLTKTextSplitter(chunk_size=2500)
 
@@ -77,10 +78,6 @@ PINECONE_API_ENV = os.getenv("PINECONE_API_ENV")
 with open('prompts.yaml', 'r') as f:
     data = yaml.load(f, Loader=yaml.FullLoader)
 
-# Counter Initialization
-with open('memory_count.yaml', 'r') as f:
-    counter = yaml.load(f, Loader=yaml.FullLoader)
-
 # internalThoughtPrompt = data['internal_thought']
 # externalThoughtPrompt = data['external_thought']
 # internalMemoryPrompt = data['internal_thought_memory']
@@ -114,14 +111,9 @@ class Agent():
         self.user_id = user_id
         self.session_id = session_id
         self.memory = None
-        self.thought_id_count = int(counter['count'])
+        self.thought_id_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]  # Timestamp with millisecond precision
         self.last_message = ""
 
-    # Keep Remebering!
-    # def __del__(self) -> None:
-    #     with open('memory_count.yaml', 'w') as f:
-    #         yaml.dump({'count': str(self.thought_id_count)}, f)
-    
     def set_user_session(self, user_id: str, session_id: str) -> None:
         self.user_id = user_id
         self.session_id = session_id
@@ -148,8 +140,7 @@ class Agent():
     
     # Adds new Memory to agent, types are: THOUGHTS, ACTIONS, QUERIES, INFORMATION
     def updateMemory(self, new_thought, thought_type):
-        with open('memory_count.yaml', 'w') as f:
-             yaml.dump({'count': str(self.thought_id_count)}, f)
+
 
         if thought_type==INFORMATION:
             new_thought = "This is information fed to you by the user:\n" + new_thought
@@ -167,7 +158,7 @@ class Agent():
         upsert_response = self.memory.upsert(
         vectors=[
             {
-            'id':f"thought-{self.thought_id_count}", 
+            'id':f"thought-{self.thought_id_timestamp}",
             'values':vector, 
             'metadata':
                 {"thought_string": new_thought, "user_id": self.user_id
@@ -176,13 +167,13 @@ class Agent():
 	    namespace=thought_type,
         )
 
-        self.thought_id_count += 1
+
 
     # Agent thinks about given query based on top k related memories. Internal thought is passed to external thought
     def internalThought(self, query) -> str:
         query_embedding = get_ada_embedding(query)
-        query_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=QUERIES, filter={'user_id': {'$in': [self.user_id]}})
-        thought_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=THOUGHTS, filter={'user_id': {'$in': [self.user_id]}})
+        query_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=QUERIES, filter={'user_id': {'$eq': self.user_id}})
+        thought_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=THOUGHTS, filter={'user_id': {'$eq': self.user_id}})
         results = query_results.matches + thought_results.matches
         sorted_results = sorted(results, key=lambda x: x.score, reverse=True)
         top_matches = "\n\n".join([(str(item.metadata["thought_string"])) for item in sorted_results])
@@ -232,13 +223,13 @@ class Agent():
             t = "This is information fed to you by the user:\n" + t
             vector = get_ada_embedding(t)
             vectors.append({
-                'id':f"thought-{self.thought_id_count}", 
+                'id':f"thought-{self.thought_id_timestamp}",
                 'values':vector, 
                 'metadata':
                     {"thought_string": t, "user_id": self.user_id
                      }
                 })
-            self.thought_id_count += 1
+
 
         upsert_response = self.memory.upsert(
         vectors,
