@@ -21,13 +21,13 @@ default_query: |-
       "cook_time": "cook time in minutes" ",
       "description": "Product description",
       "ingredients": [
-        "1 large head cauliflower, chopped",
-        "2 eggs"
+        "1 large ingredient",
+        "2 other ingredieents"
       ],
       "instructions": [
-        "Preheat oven to 425°F. Line a baking sheet with parchment paper.",
-        "In a food processor, pulse cauliflower until it forms rice-like pieces. Microwave for 8 minutes, or until soft. Let cool for a few minutes and transfer to a clean kitchen towel. Squeeze as much water as you can out of the cauliflower.",
-        "In a large bowl, mix together the cauliflower, eggs, 2 cups of shredded mozzarella, Parmesan cheese, almond flour, garlic powder, salt, and pepper until well combined."
+        "Do something",
+        "Do something else",
+        "Do even more"
       ]
     }
   }
