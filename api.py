@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import logging
 from typing import Dict, Any
 import yaml
+import re
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -79,11 +80,23 @@ async def data_request(request_data: Payload) -> dict:
         data = yaml.load(f, Loader=yaml.FullLoader)
     json_payload = request_data.payload
     default_query = data['default_query']
-    default_query = default_query.replace("{factor_1}", json_payload["factor_1"]).replace("{factor_2}",
-                                                                                    json_payload["factor_2"]).replace(
-        "{factor_3}", json_payload["factor_3"]).replace("{factor_2_option}",
-                                                                                    json_payload["factor_2_option"] ).replace(
-        "{factor_3_option}", json_payload["factor_3_option"])
+
+    factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
+    template_vals = list(set(re.findall(r'\{(\w+)\}', default_query)))
+    # template_vals = ["{health}", "{time}",  "{cost}"]
+
+    for key, val in factors_dict.items():
+        for value in template_vals:
+            if key in value:
+                default_query = default_query.replace(value, key)
+                default_value = value[:-1] +"_value}"
+                default_query = default_query.replace(default_value, value)
+
+    # default_query = default_query.replace("{value}", json_payload["health"]).replace("{speed}",
+    #                                                                                 json_payload["speed"]).replace(
+    #     "{cost}", json_payload["cost"]).replace("{factor_2_option}",
+    #                                                                                 json_payload["factor_2_option"] ).replace(
+    #     "{factor_3_option}", json_payload["factor_3_option"])
     # print("here is the request data", json_payload["query"])
     agent_instance = establish_connection()
     agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])

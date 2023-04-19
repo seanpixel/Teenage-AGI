@@ -1,9 +1,9 @@
 # Prompts to generate internal and external thoughts based on top relevant memories
 default_query: |-
   Hey ChatGPT, I need your help choosing what to eat for my next meal. 
-  There are three factors I want to consider: "{factor_1}", "{factor_2}", and "{factor_3}". For time, I have "{factor_1}" to prepare and eat my meal. 
-  For "{factor_2}", I want "{factor_2_option}". 
-  Finally, for "{factor_3}", I want "{factor_3_option}".
+  There are three factors I want to consider: "{health}", "{time}", and "{cost}". I want to optimize "{time}" to prepare and eat my meal in "{time_value}" points on a scale of 1 to 100 points . 
+  For "{health}", I want the  meal to be  "{health_value}" points on a scale of 1 to 100 points. 
+  Finally, for "{cost}", I want meal to be  "{cost_value}" points on a scale of 1 to 100 points.
   When you are inquisitive mode, I want you to suggest me something based on these three factors. 
   However, I want you to make six assumptions that would allow you to come up with one suggestion for me. 
   These assumptions should take into account my preferences for time, price, and health, as well as other factors you think are relevant. 
