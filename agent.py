@@ -13,6 +13,7 @@ import subprocess
 import datetime
 # Initialize Text Splitter
 text_splitter = NLTKTextSplitter(chunk_size=2500)
+from gptrim import trim
 
 # Load default environment variables (.env)
 load_dotenv()
@@ -24,7 +25,7 @@ def openai_call(
     prompt: str,
     model: str = OPENAI_MODEL,
     temperature: float = OPENAI_TEMPERATURE,
-    max_tokens: int = 100,
+    max_tokens: int = 2000,
 ):
     while True:
         try:
@@ -172,8 +173,8 @@ class Agent():
     # Agent thinks about given query based on top k related memories. Internal thought is passed to external thought
     def internalThought(self, query) -> str:
         query_embedding = get_ada_embedding(query)
-        query_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=QUERIES, filter={'user_id': {'$eq': self.user_id}})
-        thought_results = self.memory.query(query_embedding, top_k=2, include_metadata=True, namespace=THOUGHTS, filter={'user_id': {'$eq': self.user_id}})
+        query_results = self.memory.query(query_embedding, top_k=1, include_metadata=True, namespace=QUERIES, filter={'user_id': {'$eq': self.user_id}})
+        thought_results = self.memory.query(query_embedding, top_k=1, include_metadata=True, namespace=THOUGHTS, filter={'user_id': {'$eq': self.user_id}})
         results = query_results.matches + thought_results.matches
         sorted_results = sorted(results, key=lambda x: x.score, reverse=True)
         top_matches = "\n\n".join([(str(item.metadata["thought_string"])) for item in sorted_results])
@@ -183,6 +184,7 @@ class Agent():
         internalThoughtPrompt = internalThoughtPrompt.replace("{query}", query).replace("{top_matches}", top_matches).replace("{last_message}", self.last_message)
         print("------------INTERNAL THOUGHT PROMPT------------")
         print(internalThoughtPrompt)
+        internalThoughtPrompt = trim(internalThoughtPrompt)
         internal_thought = openai_call(internalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
         
         # Debugging purposes
@@ -200,6 +202,7 @@ class Agent():
         externalThoughtPrompt = externalThoughtPrompt.replace("{query}", query).replace("{top_matches}", top_matches).replace("{internal_thought}", internal_thought).replace("{last_message}", self.last_message)
         print("------------EXTERNAL THOUGHT PROMPT------------")
         print(externalThoughtPrompt)
+        # externalThoughtPrompt = trim(externalThoughtPrompt)
         external_thought = openai_call(externalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
 
         externalMemoryPrompt = data['external_thought_memory']

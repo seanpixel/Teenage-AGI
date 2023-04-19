@@ -45,22 +45,19 @@ internal_thought: |-
   This is not shown to the outside world but only to yourself. It is just your internal thought. Make this thought very short "
 
 external_thought: |-
-
-
-
   Based on your thought and memories, respond to the query. You don't have to refer to them if they aren't useful.
   {query}"
 
 # Prompts to create memories
 request_memory: |-
   The user said to you:
-  '{query}'. Summarize this to be very short
+  '{query}'. 
 
 internal_thought_memory: |-
   Based on the query "{query}", you thought:
-   '{internal_thought}'. Summarize this to be very short
+   '{internal_thought}'. 
 
 external_thought_memory: |-
   Based on the query "{query}", you responded with:
-   '{external_thought}'. Summarize this to be very short
+   '{external_thought}'. 
 

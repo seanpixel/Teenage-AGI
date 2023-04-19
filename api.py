@@ -92,7 +92,7 @@ async def data_request(request_data: Payload) -> dict:
                 default_query = default_query.replace(value, key)
                 for amount_value in filtered_template_vals_def:
                     if key in amount_value:
-                        default_query = default_query.replace(amount_value, val)
+                        default_query = default_query.replace(amount_value, str(val))
     logging.info("HERE STARTS THE DEFAULT QUERY TEMPLATED FOR DEBUGGING PURPOSES", str(default_query))
 
     agent_instance = establish_connection()
