@@ -7,12 +7,31 @@ default_query: |-
   When you are inquisitive mode, I want you to suggest me something based on these three factors. 
   However, I want you to make six assumptions that would allow you to come up with one suggestion for me. 
   These assumptions should take into account my preferences for time, price, and health, as well as other factors you think are relevant. 
-  They should be very short, be very specific. I have cooking skills and access to basic cooking equipment, it should not be an assumption. 
+  They should be very short, be very specific. Instructions and ingredients should not be shortened. I have cooking skills and access to basic cooking equipment, it should not be an assumption. 
   If flavors and cuisines are mentioned, one cuisine should be chosen based on ChatGPT preferences without stating it's ChatGPT favourite. 
-  If there is an assumption about ingredients, they should be listed very specifically. 
-  Assumptions should start with "Assumptions:" and be shown as a list, the result should start with "Result:" and be shown as a list.  
-  List another 6 assumptions user might want to include with "Potential Assumptions:" 
-  Summarize with one word at the top starting with "Result type" what kind of result you are offering
+  Answer with a JSON array that follows the following structure 
+  {
+    "Result type": "Recipe",
+    "Assumptions": ["Vegetarian", "Gluten-free", "Low-carb"],
+    "Body": {
+      "title": "Name of the result",
+      "rating": 4.8,
+      "image_link": "image link of the product",
+      "prep_time": "prep time in minutes" ,
+      "cook_time": "cook time in minutes" ",
+      "description": "Product description",
+      "ingredients": [
+        "1 large head cauliflower, chopped",
+        "2 eggs"
+      ],
+      "instructions": [
+        "Preheat oven to 425°F. Line a baking sheet with parchment paper.",
+        "In a food processor, pulse cauliflower until it forms rice-like pieces. Microwave for 8 minutes, or until soft. Let cool for a few minutes and transfer to a clean kitchen towel. Squeeze as much water as you can out of the cauliflower.",
+        "In a large bowl, mix together the cauliflower, eggs, 2 cups of shredded mozzarella, Parmesan cheese, almond flour, garlic powder, salt, and pepper until well combined."
+      ]
+    }
+  }
+  If the suggestion type is something else, it should follow the same format specified above with the clearly differentiated "Result type" field 
 
 internal_thought: |-
   You have been given the following input: {query}. 
@@ -23,15 +42,11 @@ internal_thought: |-
   {top_matches}
 
   Think of some actions you would take after hearing "{query}" based on your past thoughts and actions.
-  This is not shown to the outside world but only to yourself. It is just your internal thought."
+  This is not shown to the outside world but only to yourself. It is just your internal thought. Make this thought very short "
 
 external_thought: |-
-  MEMORIES sorted in relevance:
-  {top_matches}
 
-  Based on the query, you have thought about the input and had the following thought: 
-  
-  {internal_thought}. 
+
 
   Based on your thought and memories, respond to the query. You don't have to refer to them if they aren't useful.
   {query}"
@@ -39,13 +54,13 @@ external_thought: |-
 # Prompts to create memories
 request_memory: |-
   The user said to you:
-  '{query}'
+  '{query}'. Summarize this to be very short
 
 internal_thought_memory: |-
   Based on the query "{query}", you thought:
-   '{internal_thought}'
+   '{internal_thought}'. Summarize this to be very short
 
 external_thought_memory: |-
   Based on the query "{query}", you responded with:
-   '{external_thought}'
+   '{external_thought}'. Summarize this to be very short
 
