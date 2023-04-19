@@ -82,28 +82,21 @@ async def data_request(request_data: Payload) -> dict:
     default_query = data['default_query']
 
     factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
-    template_vals = list(set(re.findall(r'\{(\w+)\}', default_query)))
-    # template_vals = ["{health}", "{time}",  "{cost}"]
-
+    template_vals = list(set(re.findall(r'(\{\w+\})', default_query)))
+    filtered_template_vals = [x for x in template_vals if "value" not in x]
+    filtered_template_vals_def = [x for x in template_vals if "value"  in x]
+    logging.info("HERE ARE THE TEMPLATE VALS", str(filtered_template_vals))
     for key, val in factors_dict.items():
-        for value in template_vals:
+        for value in filtered_template_vals:
             if key in value:
                 default_query = default_query.replace(value, key)
-                default_value = value[:-1] +"_value}"
-                default_query = default_query.replace(default_value, value)
+                for amount_value in filtered_template_vals_def:
+                    if key in amount_value:
+                        default_query = default_query.replace(amount_value, val)
+    logging.info("HERE STARTS THE DEFAULT QUERY TEMPLATED FOR DEBUGGING PURPOSES", str(default_query))
 
-    # default_query = default_query.replace("{value}", json_payload["health"]).replace("{speed}",
-    #                                                                                 json_payload["speed"]).replace(
-    #     "{cost}", json_payload["cost"]).replace("{factor_2_option}",
-    #                                                                                 json_payload["factor_2_option"] ).replace(
-    #     "{factor_3_option}", json_payload["factor_3_option"])
-    # print("here is the request data", json_payload["query"])
     agent_instance = establish_connection()
     agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
-    # # response_data = process_request_data(request_data.dict())
-    # q = json.loads(request_data.query)
-    # logging.info("HERE IS THE QUERY", q)
-    # query = q.get("query")
     output = agent_instance.action(str(default_query))
     return {"response": output}
 def start_api_server():
