@@ -24,6 +24,9 @@ while True:
         elif (userInput.startswith("think:")):
             agent.think(" ".join(userInput.split(" ")[1:]))
             print("Understood! I stored that thought into my memory.")
+        elif (userInput.startswith("readDoc:")):
+            agent.readDoc(" ".join(userInput.split(" ")[1:]))
+            print("Understood! I stored the document into my memory.")
         else:
             print(agent.action(userInput), "\n")
     else:
