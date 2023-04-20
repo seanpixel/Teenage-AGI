@@ -19,7 +19,7 @@ external_thought: |-
   {internal_thought}. 
 
   Based on your thought and memories, respond to the query. You don't have to refer to them if they aren't useful.
-  {query}"
+  {query}
 
 # Prompts to create memories
 request_memory: |-
