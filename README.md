@@ -11,7 +11,7 @@ April 12: Added "read" and "think" commands. Add "read: " or "think: " in front 
 - [How it Works](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-it-works)
 - [How to Use](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-to-use)
 - [Experiments](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#experiments)
-- [More About Project & Me](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-to-use)
+- [More About Project & Me](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#more-about-the-project--me)
 - [Credits](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#credits)
 
 ## How it Works
