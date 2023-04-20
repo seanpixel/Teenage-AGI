@@ -98,7 +98,15 @@ async def data_request(request_data: Payload) -> dict:
     agent_instance = establish_connection()
     agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
     output = agent_instance.action(str(default_query))
-    return {"response": output}
+    start = output.find('{')
+    end = output.rfind('}')
+
+    if start != -1 and end != -1:
+        stripped_string_output = output[start:end + 1]
+        print(stripped_string_output)
+    else:
+        print("No JSON data found in string.")
+    return {"response": stripped_string_output}
 
 @app.post("/optimize-goal", response_model=dict)
 async def data_request(request_data: Payload) -> dict:
