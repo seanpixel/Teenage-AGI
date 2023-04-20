@@ -5,15 +5,14 @@ from dotenv import load_dotenv
 
 # Load default environment variables (.env)
 load_dotenv()
+os.environ["TOKENIZERS_PARALLELISM"] = "true" # Disables error message
 
 AGENT_NAME = os.getenv("AGENT_NAME") or "my-agent"
 
 agent = Agent(AGENT_NAME)
 
-# Creates Pinecone Index
-agent.createIndex()
-
 print("Talk to the AI!")
+
 
 while True:
     userInput = input()
