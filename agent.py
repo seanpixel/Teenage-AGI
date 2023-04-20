@@ -185,12 +185,12 @@ class Agent():
 
         for i in range(0, len(texts)):
             texts[i] = "This is information fed to you by the user:\n" + texts[i]
-            metadatas.append({"thought_type", INFORMATION})
+            metadatas.append({"thought_type": INFORMATION})
             counted_ids.append(str(self.thought_id_count))
             self.thought_id_count += 1
 
         self.memory.add(
-            texts,
+            documents=texts,
             metadatas=metadatas,
             ids=counted_ids
         )
