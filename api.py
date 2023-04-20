@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Json
 from typing import List
 import uvicorn
@@ -65,7 +66,10 @@ async def data_request(request_data: Payload) -> dict:
     agent_instance = establish_connection()
     agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
     output = agent_instance.action(str(json_payload['variate_assumption']))
-    return {"response": output}
+    stripped_string_dict = {"response": output}
+
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
 @app.post("/variate-goal", response_model=dict)
 async def data_request(request_data: Payload) -> dict:
 
@@ -73,7 +77,11 @@ async def data_request(request_data: Payload) -> dict:
     agent_instance = establish_connection()
     agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
     output = agent_instance.action(str(json_payload['variate_goal']))
-    return {"response": output}
+    stripped_string_dict = {"response": output}
+
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
+
 @app.post("/data-request", response_model=dict)
 async def data_request(request_data: Payload) -> dict:
     with open('prompts.yaml', 'r') as f:
@@ -106,7 +114,10 @@ async def data_request(request_data: Payload) -> dict:
         print(stripped_string_output)
     else:
         print("No JSON data found in string.")
-    return {"response": stripped_string_output}
+    stripped_string_dict = {"response": stripped_string_output}
+
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
 
 @app.post("/optimize-goal", response_model=dict)
 async def data_request(request_data: Payload) -> dict:
@@ -125,7 +136,10 @@ async def data_request(request_data: Payload) -> dict:
         print(stripped_string_output)
     else:
         print("No JSON data found in string.")
-    return {"response": stripped_string_output}
+    stripped_string_dict = {"response": stripped_string_output}
+
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
 def start_api_server():
     # agent = establish_connection()
     uvicorn.run(app, host="0.0.0.0", port=8000)
