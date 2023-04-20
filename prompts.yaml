@@ -45,6 +45,12 @@ internal_thought: |-
   This is not shown to the outside world but only to yourself. It is just your internal thought. Make this thought very short "
 
 external_thought: |-
+  MEMORIES sorted in relevance:
+  {top_matches}
+
+  Based on the query, you have thought about the input and had the following thought: 
+  
+  {internal_thought}. 
   Based on your thought and memories, respond to the query. You don't have to refer to them if they aren't useful.
   {query}"
 
@@ -61,3 +67,38 @@ external_thought_memory: |-
   Based on the query "{query}", you responded with:
    '{external_thought}'. 
 
+optimize_goal: |-
+  Based on all the history and information of this user, suggest three goals that are personal to him that he should apply to optimize his time.
+  Only JSON values should be the output, don't write anything extra, no warnings no explanations. 
+  Make sure to provide data in the following format
+  {
+    "Goals": [
+      {
+        "name": "Vegetarian",
+        "min": 0,
+        "max": 1,
+        "unit_name": "",
+        "option_array": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "Gluten-free",
+        "min": 0,
+        "max": 1,
+        "unit_name": "",
+        "option_array": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "Low-carb",
+        "min": 0,
+        "max": 100,
+        "unit_name": "g",
+        "option_array": []
+      }
+    ]
+  }

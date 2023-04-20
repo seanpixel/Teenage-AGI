@@ -99,6 +99,25 @@ async def data_request(request_data: Payload) -> dict:
     agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
     output = agent_instance.action(str(default_query))
     return {"response": output}
+
+@app.post("/optimize-goal", response_model=dict)
+async def data_request(request_data: Payload) -> dict:
+    with open('prompts.yaml', 'r') as f:
+        data = yaml.load(f, Loader=yaml.FullLoader)
+    default_query = data['optimize_goal']
+    json_payload = request_data.payload
+    agent_instance = establish_connection()
+    agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent_instance.action(str(default_query))
+    start = output.find('{')
+    end = output.rfind('}')
+
+    if start != -1 and end != -1:
+        stripped_string_output = output[start:end + 1]
+        print(stripped_string_output)
+    else:
+        print("No JSON data found in string.")
+    return {"response": stripped_string_output}
 def start_api_server():
     # agent = establish_connection()
     uvicorn.run(app, host="0.0.0.0", port=8000)
