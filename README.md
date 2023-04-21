@@ -1,11 +1,11 @@
 # Teenage-AGI
 
 ## Objective
-Inspired by the several Auto-GPT related Projects (predominently BabyAGI) and the Paper ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442), this python project uses OpenAI and Pinecone to Give memory to an AI agent and also allows it to "think" before making an action (outputting text). Also, just by shutting down the AI, it doesn't forget its memories since it lives on Pinecone and its memory_counter saves the index that its on.
+Inspired by several Auto-GPT-related Projects (predominantly BabyAGI) and the Paper ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442), this Python project uses OpenAI and Pinecone to Give memory to an AI agent and also allows it to "think" before making an action (outputting text). Also, just by shutting down the AI, it doesn't forget its memories since it lives on Pinecone and its memory_counter saves the index that it's on.
 
 
 ## Updates
-April 12: Added "read" and "think" commands. Add "read: " or "think: " in front of a query to feed it information using read (any length works) or insert a memory into agent.
+April 12: Added "read" and "think" commands. Add "read: " or "think: " in front of a query to feed it information using read (any length works) or insert a memory into an agent.
 
 ### Sections
 - [How it Works](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-it-works)
@@ -15,7 +15,7 @@ April 12: Added "read" and "think" commands. Add "read: " or "think: " in front 
 - [Credits](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#credits)
 
 ## How it Works
-Here is what happens everytime the AI is queried by the user:
+Here is what happens every time the AI is queried by the user:
 1. AI vectorizes the query and stores it in a Pinecone Vector Database
 2. AI looks inside its memory and finds memories and past queries that are relevant to the current query
 3. AI thinks about what action to take
@@ -40,7 +40,7 @@ docker-compose run teenage-agi
 Currently, using GPT-4, I found that it can remember its name and other characteristics. It also carries on the conversation quite well without a context window (although I might add it soon). I will update this section as I keep playing with it.
 
 ## More about the Project & Me
-After reading the Simulcra paper, I made this project in my college dorm. I realized that most of the "language" that I generate are inside my head, so I thought maybe it would make sense if AGI does as well. I'm a founder currently runing a startup called [DSNR]([url](https://www.dsnr.ai/)) and also a first-year at USC. Contact me on [twitter](https://twitter.com/sean_pixel) about anything would love to chat.
+After reading the Simulcra paper, I made this project in my college dorm. I realized that most of the "language" that I generate is inside my head, so I thought maybe it would make sense if AGI does as well. I'm a founder currently running a startup called [DSNR]([url](https://www.dsnr.ai/)) and also a first-year at USC. Contact me on [twitter](https://twitter.com/sean_pixel) about anything would love to chat.
 
 ## Credits
 Thank you to [@yoheinakajima](https://twitter.com/yoheinakajima) and the team behind ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442) for the idea!
