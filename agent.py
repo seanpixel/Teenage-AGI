@@ -68,6 +68,10 @@ def get_ada_embedding(text):
             "data"
         ][0]["embedding"]
 
+def read_txtFile(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        text = file.read()
+    return text
 
 class Agent():
     def __init__(self, table_name=None) -> None:
@@ -200,9 +204,23 @@ class Agent():
         vectors,
 	    namespace=INFORMATION,
         )
+    # Make agent read a document
+    def readDoc(self, text) -> str:
+        texts = text_splitter.split_text(read_txtFile(text))
+        vectors = []
+        for t in texts:
+            t = "This is a document fed to you by the user:\n" + t
+            vector = get_ada_embedding(t)
+            vectors.append({
+                'id':f"thought-{self.thought_id_count}", 
+                'values':vector, 
+                'metadata':
+                    {"thought_string": t, 
+                     }
+                })
+            self.thought_id_count += 1
 
-
-
-
-
-   
+        upsert_response = self.memory.upsert(
+        vectors,
+	    namespace=INFORMATION,
+        )
