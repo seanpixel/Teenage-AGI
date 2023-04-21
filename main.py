@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # Load default environment variables (.env)
 load_dotenv()
 
-AGENT_NAME = os.getenv("AGENT_NAME") or "my-agent"
+AGENT_NAME = os.getenv("AGENT_NAME", "my-agent")
 
 agent = Agent(AGENT_NAME)
 
