@@ -128,7 +128,7 @@ class Agent():
             return
 
         dimension = 1536
-        metric = "cosine"
+        metric = "euclidean"
         pod_type = "p1"
         if self.table_name not in pinecone.list_indexes():
             pinecone.create_index(
@@ -171,46 +171,49 @@ class Agent():
 
 
     # Agent thinks about given query based on top k related memories. Internal thought is passed to external thought
-    def internalThought(self, query) -> str:
-        query_embedding = get_ada_embedding(query)
-        query_results = self.memory.query(query_embedding, top_k=1, include_metadata=True, namespace=QUERIES, filter={'user_id': {'$eq': self.user_id}})
-        thought_results = self.memory.query(query_embedding, top_k=1, include_metadata=True, namespace=THOUGHTS, filter={'user_id': {'$eq': self.user_id}})
-        results = query_results.matches + thought_results.matches
-        sorted_results = sorted(results, key=lambda x: x.score, reverse=True)
-        top_matches = "\n\n".join([(str(item.metadata["thought_string"])) for item in sorted_results])
-        #print(top_matches)
-        
-        internalThoughtPrompt = data['internal_thought']
-        internalThoughtPrompt = internalThoughtPrompt.replace("{query}", query).replace("{top_matches}", top_matches).replace("{last_message}", self.last_message)
-        print("------------INTERNAL THOUGHT PROMPT------------")
-        print(internalThoughtPrompt)
-        internalThoughtPrompt = trim(internalThoughtPrompt)
-        internal_thought = openai_call(internalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
-        
-        # Debugging purposes
-        #print(internal_thought)
-
-        internalMemoryPrompt = data['internal_thought_memory']
-        internalMemoryPrompt = internalMemoryPrompt.replace("{query}", query).replace("{internal_thought}", internal_thought).replace("{last_message}", self.last_message)
-        self.updateMemory(internalMemoryPrompt, THOUGHTS)
-        return internal_thought, top_matches
+    # def internalThought(self, query) -> str:
+    #     # query_embedding = get_ada_embedding(query)
+    #     # query_results = self.memory.query(query_embedding, top_k=1, include_metadata=True, namespace=QUERIES, filter={'user_id': {'$eq': self.user_id}})
+    #     # thought_results = self.memory.query(query_embedding, top_k=1, include_metadata=True, namespace=THOUGHTS, filter={'user_id': {'$eq': self.user_id}})
+    #     # results = query_results.matches + thought_results.matches
+    #     # sorted_results = sorted(results, key=lambda x: x.score, reverse=True)
+    #     # top_matches = "\n\n".join([(str(item.metadata["thought_string"])) for item in sorted_results])
+    #     # #print(top_matches)
+    #     #
+    #     internalThoughtPrompt = data['internal_thought']
+    #     internalThoughtPrompt = internalThoughtPrompt.replace("{query}", query)
+    #     #     .replace("{top_matches}", top_matches).replace("{last_message}", self.last_message)
+    #     print("------------INTERNAL THOUGHT PROMPT------------")
+    #     print(internalThoughtPrompt)
+    #     internalThoughtPrompt = trim(internalThoughtPrompt)
+    #     internal_thought = openai_call(internalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
+    #
+    #     # Debugging purposes
+    #     #print(internal_thought)
+    #
+    #     internalMemoryPrompt = data['internal_thought_memory']
+    #     internalMemoryPrompt = internalMemoryPrompt.replace("{query}", query).replace("{internal_thought}", internal_thought).replace("{last_message}", self.last_message)
+    #     self.updateMemory(internalMemoryPrompt, THOUGHTS)
+    #     return internal_thought, top_matches
 
     def action(self, query) -> str:
-        internal_thought, top_matches = self.internalThought(query)
+        # internal_thought, top_matches = self.internalThought(query)
         
         externalThoughtPrompt = data['external_thought']
-        externalThoughtPrompt = externalThoughtPrompt.replace("{query}", query).replace("{top_matches}", top_matches).replace("{internal_thought}", internal_thought).replace("{last_message}", self.last_message)
+
+        externalThoughtPrompt = externalThoughtPrompt.replace("{query}", query)
+            #.replace("{top_matches}", top_matches).replace("{internal_thought}", internal_thought).replace("{last_message}", self.last_message)
         print("------------EXTERNAL THOUGHT PROMPT------------")
         print(externalThoughtPrompt)
         # externalThoughtPrompt = trim(externalThoughtPrompt)
         external_thought = openai_call(externalThoughtPrompt) # OPENAI CALL: top_matches and query text is used here
 
-        externalMemoryPrompt = data['external_thought_memory']
-        externalMemoryPrompt = externalMemoryPrompt.replace("{query}", query).replace("{external_thought}", external_thought)
-        self.updateMemory(externalMemoryPrompt, THOUGHTS)
-        request_memory = data["request_memory"]
-        self.updateMemory(request_memory.replace("{query}", query), QUERIES)
-        self.last_message = query
+        # externalMemoryPrompt = data['external_thought_memory']
+        # externalMemoryPrompt = externalMemoryPrompt.replace("{query}", query).replace("{external_thought}", external_thought)
+        # self.updateMemory(externalMemoryPrompt, THOUGHTS)
+        # request_memory = data["request_memory"]
+        # self.updateMemory(request_memory.replace("{query}", query), QUERIES)
+        # self.last_message = query
         return external_thought
 
     # Make agent think some information
