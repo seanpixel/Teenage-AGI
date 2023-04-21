@@ -1,4 +1,3 @@
-import agent
 import os
 from agent import Agent
 from dotenv import load_dotenv
@@ -15,16 +14,22 @@ agent.createIndex()
 
 print("Talk to the AI!")
 
-while True:
-    userInput = input()
-    if userInput:
-        if (userInput.startswith("read:")):
-            agent.read(" ".join(userInput.split(" ")[1:]))
-            print("Understood! The information is stored in my memory.")
-        elif (userInput.startswith("think:")):
-            agent.think(" ".join(userInput.split(" ")[1:]))
-            print("Understood! I stored that thought into my memory.")
+
+def main():
+    while True:
+        userInput = input()
+        if userInput:
+            if (userInput.startswith("read:")):
+                agent.read(" ".join(userInput.split(" ")[1:]))
+                print("Understood! The information is stored in my memory.")
+            elif (userInput.startswith("think:")):
+                agent.think(" ".join(userInput.split(" ")[1:]))
+                print("Understood! I stored that thought into my memory.")
+            else:
+                print(agent.action(userInput), "\n")
         else:
-            print(agent.action(userInput), "\n")
-    else:
-        print("SYSTEM - Give a valid input")
+            print("SYSTEM - Give a valid input")
+
+
+if __name__ == "__main__":
+    main()
