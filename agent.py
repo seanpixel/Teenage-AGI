@@ -106,7 +106,7 @@ def get_ada_embedding(text):
         ][0]["embedding"]
 
 
-class Agent():
+class Agento():
     def __init__(self, table_name=None, user_id: Optional[str] = "123", session_id: Optional[str] = None) -> None:
         self.table_name = table_name
         self.user_id = user_id
@@ -136,6 +136,8 @@ class Agent():
             )
 
         # Give memory
+        #my-agent
+        #        self.memory = pinecone.Index(self.table_name)
         self.memory = pinecone.Index(self.table_name)
 
     

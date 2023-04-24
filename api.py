@@ -5,12 +5,13 @@ from typing import List
 import uvicorn
 import agent
 import os
-from agent import Agent
+from agent import Agento
 from dotenv import load_dotenv
 import logging
 from typing import Dict, Any
 import yaml
 import re
+from replacement_chains import Agent
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -28,7 +29,7 @@ from dotenv import load_dotenv
 def establish_connection():
     AGENT_NAME = os.getenv("AGENT_NAME") or "my-agent"
 
-    agent = Agent(AGENT_NAME)
+    agent = Agento(AGENT_NAME)
     agent.createIndex()
     return agent
 load_dotenv()
@@ -60,7 +61,7 @@ class ImageResponse(BaseModel):
 #     return ImageResponse(success=success, message=message)
 import json
 @app.post("/variate-assumption", response_model=dict)
-async def data_request(request_data: Payload) -> dict:
+async def variate_assumption(request_data: Payload) -> dict:
 
     json_payload = request_data.payload
     agent_instance = establish_connection()
@@ -70,8 +71,20 @@ async def data_request(request_data: Payload) -> dict:
 
     # Return a JSON response with the new dictionary
     return JSONResponse(content=stripped_string_dict)
+
+@app.post("/variate-diet-assumption", response_model=dict)
+async def variate_diet_assumption(request_data: Payload) -> dict:
+
+    json_payload = request_data.payload
+    agent_instance =Agent()
+    agent_instance.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent_instance.update_agent_preferences(str(json_payload['variate_assumption']))
+    stripped_string_dict = {"response": output}
+
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
 @app.post("/variate-goal", response_model=dict)
-async def data_request(request_data: Payload) -> dict:
+async def variate_goal(request_data: Payload) -> dict:
 
     json_payload = request_data.payload
     agent_instance = establish_connection()
@@ -119,6 +132,25 @@ async def data_request(request_data: Payload) -> dict:
     # Return a JSON response with the new dictionary
     return JSONResponse(content=stripped_string_dict)
 
+
+@app.post("/recipe-request", response_model=dict)
+async def recipe_request(request_data: Payload) -> dict:
+
+    json_payload = request_data.payload
+    factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
+    agent = Agent()
+    agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent.solution_generation(factors_dict)
+    start = output.find('{')
+    end = output.rfind('}')
+    if start != -1 and end != -1:
+        stripped_string_output = output[start:end + 1]
+        print(stripped_string_output)
+    else:
+        print("No JSON data found in string.")
+    stripped_string_dict = {"response": stripped_string_output}
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
 @app.post("/optimize-goal", response_model=dict)
 async def data_request(request_data: Payload) -> dict:
     with open('prompts.yaml', 'r') as f:
@@ -138,6 +170,25 @@ async def data_request(request_data: Payload) -> dict:
         print("No JSON data found in string.")
     stripped_string_dict = {"response": stripped_string_output}
 
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
+
+@app.post("/optimize-diet-goal", response_model=dict)
+async def optimize_diet_goal(request_data: Payload) -> dict:
+    json_payload = request_data.payload
+    # factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
+    agent = Agent()
+    # agent_instance = establish_connection()
+    agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent.goal_optimization({})
+    start = output.find('{')
+    end = output.rfind('}')
+    if start != -1 and end != -1:
+        stripped_string_output = output[start:end + 1]
+        print(stripped_string_output)
+    else:
+        print("No JSON data found in string.")
+    stripped_string_dict = {"response": stripped_string_output}
     # Return a JSON response with the new dictionary
     return JSONResponse(content=stripped_string_dict)
 def start_api_server():
