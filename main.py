@@ -1,6 +1,6 @@
 import agent
 import os
-from agent import Agent
+from agent import Agento
 from dotenv import load_dotenv
 from api import start_api_server
 import importlib
@@ -17,12 +17,12 @@ def can_import(module_name):
     except ImportError:
         return False
 
-# AGENT_NAME = os.getenv("AGENT_NAME") or "my-agent"
-#
-# agent = Agent(AGENT_NAME)
-#
-# # Creates Pinecone Index
-# agent.createIndex()
+AGENT_NAME = os.getenv("AGENT_NAME") or "my-agent"
+
+agent = Agento(AGENT_NAME)
+
+# Creates Pinecone Index
+agent.createIndex()
 # API Keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is missing from .env"

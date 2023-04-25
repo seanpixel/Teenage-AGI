@@ -1,35 +1,51 @@
 # Prompts to generate internal and external thoughts based on top relevant memories
 default_query: |-
   Hey ChatGPT, I need your help choosing what to eat for my next meal. 
-  There are three factors I want to consider: '{health}', '{time}', and '{cost}'. I want to optimize '{time}' to prepare and eat my meal in '{time_value}' points on a scale of 1 to 100 points . 
-  For '{health}', I want the  meal to be '{health_value}' points on a scale of 1 to 100 points. 
-  Finally, for '{cost}', I want meal to be '{cost_value}' points on a scale of 1 to 100 points.
+  There are three factors I want you to consider: '{factor1}' '{factor2}' '{factor3}'
   When you are inquisitive mode, I want you to suggest me something based on these three factors. 
   However, I want you to make six assumptions that would allow you to come up with one suggestion for me. 
-  These assumptions should take into account my preferences for time, price, and health, as well as other factors you think are relevant. 
+  These assumptions should take into account my preferences for the factors above as well as other factors you think are relevant. 
   They should be very short, be very specific. Instructions and ingredients should not be shortened. I have cooking skills and access to basic cooking equipment, it should not be an assumption. 
   If flavors and cuisines are mentioned, one cuisine should be chosen based on ChatGPT preferences without stating it's ChatGPT favourite. 
-  Answer with a JSON array that follows the following structure 
+  Answer with multiple recipes in a JSON that follows the following structure 
   {
-    "Result type": "Recipe",
-    "Assumptions": ["Vegetarian", "Gluten-free", "Low-carb"],
-    "Body": {
-      "title": "Name of the result",
-      "rating": 4.8,
-      "image_link": "image link of the product",
-      "prep_time": "prep time in minutes" ,
-      "cook_time": "cook time in minutes" ",
-      "description": "Product description",
-      "ingredients": [
-        "1 large ingredient",
-        "2 other ingredieents"
-      ],
-      "instructions": [
-        "Do something",
-        "Do something else",
-        "Do even more"
-      ]
-    }
+    "resultType": "Recipe",
+    "assumptions": ["Vegetarian", "Gluten-free", "Low-carb"],
+    "body": [
+      {
+        "title": "Name of the result",
+        "rating": 4.8,
+        "image_link": "image link of the product",
+        "prep_time": "prep time in minutes" ,
+        "cook_time": "cook time in minutes" ",
+        "description": "Product description",
+        "ingredients": [
+          "1 large ingredient",
+          "2 other ingredieents"
+        ],
+        "instructions": [
+          "Do something",
+          "Do something else",
+          "Do even more"
+        ]
+      },
+      {
+        "title": "Name of the 2. result",
+        "rating": 4.8,
+        "image_link": "image link of the product",
+        "prep_time": "prep time in minutes" ,
+        "cook_time": "cook time in minutes" ",
+        "description": "Product description",
+        "ingredients": [
+          "1 large ingredient",
+          "2 other ingredieents"
+        ],
+        "instructions": [
+          "Do something",
+          "Do something else",
+          "Do even more"
+        ]
+      }
   }
   If the suggestion type is something else, it should follow the same format specified above with the clearly differentiated "Result type" field 
 
@@ -68,37 +84,28 @@ external_thought_memory: |-
    '{external_thought}'. 
 
 optimize_goal: |-
-  Based on all the history and information of this user, suggest three goals that are personal to him that he should apply to optimize his time.
+  Based on all the history and information of this user, suggest three factors that are personal to him that he should apply to optimize his healty food.
   Only JSON values should be the output, don't write anything extra, no warnings no explanations. 
   Make sure to provide data in the following format
   {
-    "Goals": [
+    "goals": [
       {
-        "name": "Vegetarian",
-        "min": 0,
-        "max": 1,
-        "unit_name": "",
-        "option_array": [
-          "Yes",
-          "No"
-        ]
+        "name": "<string, name of the factor>",
+        "min": <integer, minimum value of the measurable factor range>,
+        "max": <integer, maximum value of the measurable factor range>,
+        "unit_name": <string, unit name of the factor>
       },
       {
-        "name": "Gluten-free",
-        "min": 0,
-        "max": 1,
-        "unit_name": "",
-        "option_array": [
-          "Yes",
-          "No"
-        ]
+        "name": "<string, name of the factor>",
+        "min": <integer, minimum value of the measurable factor range>,
+        "max": <integer, maximum value of the measurable factor range>,
+        "unit_name": <string, unit name of the factor>
       },
       {
-        "name": "Low-carb",
-        "min": 0,
-        "max": 100,
-        "unit_name": "g",
-        "option_array": []
+        "name": "<string, name of the factor>",
+        "min": <integer, minimum value of the measurable factor range>,
+        "max": <integer, maximum value of the measurable factor range>,
+        "unit_name": <string, unit name of the factor>
       }
     ]
   }
