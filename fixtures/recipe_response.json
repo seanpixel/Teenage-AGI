@@ -1,0 +1,71 @@
+{
+  "resultType": "Recipe",
+  "assumptions": [
+    "High-protein",
+    "High-fiber",
+    "Low-sodium",
+    "Quick",
+    "Affordable",
+    "Healthy"
+  ],
+  "body": [
+    {
+      "title": "Grilled Chicken and Vegetable Skewers",
+      "rating": 4.5,
+      "image_link": "https://www.eatingwell.com/wp-content/uploads/2020/07/Grilled-Chicken-Vegetable-Skewers.jpg",
+      "prep_time": "20",
+      "cook_time": "10",
+      "description": "These grilled chicken and vegetable skewers are a healthy and delicious meal option that are high in protein and fiber, low in sodium, quick to make, affordable, and healthy. The chicken is marinated in a flavorful mixture of olive oil, lemon juice, garlic, and herbs, while the vegetables are seasoned with a blend of spices. The skewers are then grilled to perfection, resulting in a tasty and satisfying meal.",
+      "ingredients": [
+        "1 lb boneless, skinless chicken breasts, cut into 1-inch pieces",
+        "1 red bell pepper, cut into 1-inch pieces",
+        "1 yellow bell pepper, cut into 1-inch pieces",
+        "1 zucchini, cut into 1-inch pieces",
+        "1 red onion, cut into 1-inch pieces",
+        "1/4 cup olive oil",
+        "2 tbsp lemon juice",
+        "2 cloves garlic, minced",
+        "1 tsp dried oregano",
+        "1 tsp dried thyme",
+        "1/2 tsp salt",
+        "1/4 tsp black pepper"
+      ],
+      "instructions": [
+        "Preheat grill to medium-high heat.",
+        "In a large bowl, whisk together olive oil, lemon juice, garlic, oregano, thyme, salt, and black pepper.",
+        "Add chicken to the bowl and toss to coat.",
+        "Thread chicken, bell peppers, zucchini, and red onion onto skewers.",
+        "Grill skewers for 8-10 minutes, turning occasionally, until chicken is cooked through and vegetables are tender."
+      ]
+    },
+    {
+      "title": "2. Grilled Chicken and Vegetable Skewers",
+      "rating": 4.5,
+      "image_link": "https://www.eatingwell.com/wp-content/uploads/2020/07/Grilled-Chicken-Vegetable-Skewers.jpg",
+      "prep_time": "20",
+      "cook_time": "10",
+      "description": "These grilled chicken and vegetable skewers are a healthy and delicious meal option that are high in protein and fiber, low in sodium, quick to make, affordable, and healthy. The chicken is marinated in a flavorful mixture of olive oil, lemon juice, garlic, and herbs, while the vegetables are seasoned with a blend of spices. The skewers are then grilled to perfection, resulting in a tasty and satisfying meal.",
+      "ingredients": [
+        "1 lb boneless, skinless chicken breasts, cut into 1-inch pieces",
+        "1 red bell pepper, cut into 1-inch pieces",
+        "1 yellow bell pepper, cut into 1-inch pieces",
+        "1 zucchini, cut into 1-inch pieces",
+        "1 red onion, cut into 1-inch pieces",
+        "1/4 cup olive oil",
+        "2 tbsp lemon juice",
+        "2 cloves garlic, minced",
+        "1 tsp dried oregano",
+        "1 tsp dried thyme",
+        "1/2 tsp salt",
+        "1/4 tsp black pepper"
+      ],
+      "instructions": [
+        "Preheat grill to medium-high heat.",
+        "In a large bowl, whisk together olive oil, lemon juice, garlic, oregano, thyme, salt, and black pepper.",
+        "Add chicken to the bowl and toss to coat.",
+        "Thread chicken, bell peppers, zucchini, and red onion onto skewers.",
+        "Grill skewers for 8-10 minutes, turning occasionally, until chicken is cooked through and vegetables are tender."
+      ]
+    }
+  ]
+}

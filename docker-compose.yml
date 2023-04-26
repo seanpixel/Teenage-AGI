@@ -2,7 +2,35 @@ version: "3.9"
 
 services:
   teenage-agi:
-    build: ./
+    networks:
+      - agi_backend
+    depends_on:
+      - db_agi
+    build:
+      context: ./
+      args:
+        - API_ENABLED
     volumes:
       - "./:/app"
+    environment:
+      - HOST=0.0.0.0
     profiles: ["exclude-from-up"] # Use `docker-compose run teenage-agi` to get an attached container
+    ports:
+      - 8000:8000
+
+  db_agi:
+    image: postgres:14-alpine
+    container_name: "agi_db"
+    networks:
+      - agi_backend
+    ports:
+      - "65432:5432"
+    environment:
+      POSTGRES_USER: master
+      POSTGRES_PASSWORD: supersecreto
+      POSTGRES_DB: agi_db
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+networks:
+  agi_backend:
+    name: agi_backend

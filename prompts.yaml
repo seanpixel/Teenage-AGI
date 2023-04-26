@@ -1,4 +1,54 @@
 # Prompts to generate internal and external thoughts based on top relevant memories
+default_query: |-
+  Hey ChatGPT, I need your help choosing what to eat for my next meal. 
+  There are three factors I want you to consider: '{factor1}' '{factor2}' '{factor3}'
+  When you are inquisitive mode, I want you to suggest me something based on these three factors. 
+  However, I want you to make six assumptions that would allow you to come up with one suggestion for me. 
+  These assumptions should take into account my preferences for the factors above as well as other factors you think are relevant. 
+  They should be very short, be very specific. Instructions and ingredients should not be shortened. I have cooking skills and access to basic cooking equipment, it should not be an assumption. 
+  If flavors and cuisines are mentioned, one cuisine should be chosen based on ChatGPT preferences without stating it's ChatGPT favourite. 
+  Answer with multiple recipes in a JSON that follows the following structure 
+  {
+    "resultType": "Recipe",
+    "assumptions": ["Vegetarian", "Gluten-free", "Low-carb"],
+    "body": [
+      {
+        "title": "Name of the result",
+        "rating": 4.8,
+        "image_link": "image link of the product",
+        "prep_time": "prep time in minutes" ,
+        "cook_time": "cook time in minutes" ",
+        "description": "Product description",
+        "ingredients": [
+          "1 large ingredient",
+          "2 other ingredieents"
+        ],
+        "instructions": [
+          "Do something",
+          "Do something else",
+          "Do even more"
+        ]
+      },
+      {
+        "title": "Name of the 2. result",
+        "rating": 4.8,
+        "image_link": "image link of the product",
+        "prep_time": "prep time in minutes" ,
+        "cook_time": "cook time in minutes" ",
+        "description": "Product description",
+        "ingredients": [
+          "1 large ingredient",
+          "2 other ingredieents"
+        ],
+        "instructions": [
+          "Do something",
+          "Do something else",
+          "Do even more"
+        ]
+      }
+  }
+  If the suggestion type is something else, it should follow the same format specified above with the clearly differentiated "Result type" field 
+
 internal_thought: |-
   You have been given the following input: {query}. 
   You must think about it and plan what action to take.
@@ -8,7 +58,7 @@ internal_thought: |-
   {top_matches}
 
   Think of some actions you would take after hearing "{query}" based on your past thoughts and actions.
-  This is not shown to the outside world but only to yourself. It is just your internal thought."
+  This is not shown to the outside world but only to yourself. It is just your internal thought. Make this thought very short "
 
 external_thought: |-
   MEMORIES sorted in relevance:
@@ -17,20 +67,45 @@ external_thought: |-
   Based on the query, you have thought about the input and had the following thought: 
   
   {internal_thought}. 
-
   Based on your thought and memories, respond to the query. You don't have to refer to them if they aren't useful.
   {query}"
 
 # Prompts to create memories
 request_memory: |-
   The user said to you:
-  '{query}'
+  '{query}'. 
 
 internal_thought_memory: |-
   Based on the query "{query}", you thought:
-   '{internal_thought}'
+   '{internal_thought}'. 
 
 external_thought_memory: |-
   Based on the query "{query}", you responded with:
-   '{external_thought}'
+   '{external_thought}'. 
 
+optimize_goal: |-
+  Based on all the history and information of this user, suggest three factors that are personal to him that he should apply to optimize his healty food.
+  Only JSON values should be the output, don't write anything extra, no warnings no explanations. 
+  Make sure to provide data in the following format
+  {
+    "goals": [
+      {
+        "name": "<string, name of the factor>",
+        "min": <integer, minimum value of the measurable factor range>,
+        "max": <integer, maximum value of the measurable factor range>,
+        "unit_name": <string, unit name of the factor>
+      },
+      {
+        "name": "<string, name of the factor>",
+        "min": <integer, minimum value of the measurable factor range>,
+        "max": <integer, maximum value of the measurable factor range>,
+        "unit_name": <string, unit name of the factor>
+      },
+      {
+        "name": "<string, name of the factor>",
+        "min": <integer, minimum value of the measurable factor range>,
+        "max": <integer, maximum value of the measurable factor range>,
+        "unit_name": <string, unit name of the factor>
+      }
+    ]
+  }

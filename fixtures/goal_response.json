@@ -1,0 +1,22 @@
+{
+    "goals": [
+        {
+            "name": "Protein intake",
+            "min": 80,
+            "max": 120,
+            "unit_name": "grams"
+        },
+        {
+            "name": "Fiber intake",
+            "min": 25,
+            "max": 35,
+            "unit_name": "grams"
+        },
+        {
+            "name": "Sodium intake",
+            "min": 1500,
+            "max": 2300,
+            "unit_name": "milligrams"
+        }
+    ]
+}

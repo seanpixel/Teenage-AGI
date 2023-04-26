@@ -15,6 +15,12 @@ Baby AGI -> https://github.com/yoheinakajima/babyagi
 Inspired by the several Auto-GPT related Projects (predominently BabyAGI) and the Paper ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442), the original python project uses OpenAI and Pinecone to Give memory to an AI agent and also allows it to "think" before making an action (outputting text). Also, just by shutting down the AI, it doesn't forget its memories since it lives on Pinecone and its memory_counter saves the index that its on.
 
 
+## Instructions
+API_ENABLED switches between API and version that works 
+docker-compose build --build-arg API_ENABLED=False teenage-agi
+
+
+
 ## Updates
 April 12: Added "read" and "think" commands. Add "read: " or "think: " in front of a query to feed it information using read (any length works) or insert a memory into agent.
 
@@ -44,8 +50,9 @@ Here is what happens everytime the AI is queried by the user:
 ## Running in a docker container
 You can run the system isolated in a container using docker-compose:
 ```
-docker-compose run teenage-agi
+docker-compose up teenage-agi
 ```
+curl -X POST "http://0.0.0.0:8000/data-request" -H "Content-Type: application/json" --data-raw '{"payload": {"user_id": "657", "session_id": "456", "factor_1": "90 minutes", "factor_2": "cost", "factor_3": "health", "factor_2_option": "cheap", "factor_3_option":"very healthy",   "query": "Who is best doctor in Kenya"}}'
 
 ## Experiments
 Currently, using GPT-4, I found that it can remember its name and other characteristics. It also carries on the conversation quite well without a context window (although I might add it soon). I will update this section as I keep playing with it.
