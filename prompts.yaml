@@ -1,16 +1,15 @@
 # Prompts to generate internal and external thoughts based on top relevant memories
 default_query: |-
-  Hey ChatGPT, I need your help choosing what to eat for my next meal. 
+ I need your help choosing what to eat for my next meal. 
   There are three factors I want you to consider: '{factor1}' '{factor2}' '{factor3}'
   When you are inquisitive mode, I want you to suggest me something based on these three factors. 
   However, I want you to make six assumptions that would allow you to come up with one suggestion for me. 
   These assumptions should take into account my preferences for the factors above as well as other factors you think are relevant. 
-  They should be very short, be very specific. Instructions and ingredients should not be shortened. I have cooking skills and access to basic cooking equipment, it should not be an assumption. 
-  If flavors and cuisines are mentioned, one cuisine should be chosen based on ChatGPT preferences without stating it's ChatGPT favourite. 
+  They should be very short, be very specific. Instructions and ingredients should not be shortened. 
   Answer with multiple recipes in a JSON that follows the following structure 
   {
     "resultType": "Recipe",
-    "assumptions": ["Vegetarian", "Gluten-free", "Low-carb"],
+    "assumptions": ["Vegetarian", "Gluten-free"],
     "body": [
       {
         "title": "Name of the result",
@@ -47,7 +46,6 @@ default_query: |-
         ]
       }
   }
-  If the suggestion type is something else, it should follow the same format specified above with the clearly differentiated "Result type" field 
 
 internal_thought: |-
   You have been given the following input: {query}. 
