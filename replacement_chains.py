@@ -33,8 +33,8 @@ PINECONE_API_ENV = os.getenv("PINECONE_API_ENV", "")
 REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN", "")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is missing from .env"
 import os
-os.environ["GPLACES_API_KEY"] = "AIzaSyCAvRAf1eCJ27fTfjJauVgdhI5fodAFA_k"
-pinecone.init(api_key="4e0982ad-57d5-41ac-bce5-d1fd2c2da273", environment="us-west1-gcp")
+os.environ["GPLACES_API_KEY"] = None
+
 class Agent():
     def __init__(self, table_name=None, user_id: Optional[str] = "user123", session_id: Optional[str] = None) -> None:
         self.table_name = table_name
