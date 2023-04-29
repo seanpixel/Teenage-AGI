@@ -4,6 +4,7 @@ from agent import Agento
 from dotenv import load_dotenv
 from api import start_api_server
 import importlib
+from replacement_chains import Agent
 import uvicorn
 API_ENABLED = os.environ.get("API_ENABLED", "False").lower() == "true"
 
@@ -19,7 +20,7 @@ def can_import(module_name):
 
 AGENT_NAME = os.getenv("AGENT_NAME") or "my-agent"
 
-agent = Agento(AGENT_NAME)
+agent = Agent(AGENT_NAME)
 
 # Creates Pinecone Index
 agent.createIndex()

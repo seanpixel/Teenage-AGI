@@ -1,161 +1,100 @@
 from langchain.prompts import PromptTemplate
-from langchain.llms import OpenAI
-from langchain.chains import LLMChain
-from langchain.chains import LLMSummarizationCheckerChain
+
 import pinecone
-import re
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 import openai
 import datetime
 from jinja2 import Template
+from dotenv import load_dotenv
 import time
-import os
-import yaml
-
-from langchain.agents import (
-    create_json_agent,
-    AgentExecutor
-)
-from langchain.agents.agent_toolkits import JsonToolkit
-from langchain.chains import LLMChain
 from langchain.llms.openai import OpenAI
-from langchain.requests import TextRequestsWrapper
-from langchain.tools.json.tool import JsonSpec
-from pydantic import BaseModel, Field
-
 from langchain import LLMChain
-from langchain.chat_models import ChatOpenAI
-from langchain.docstore import InMemoryDocstore
-from langchain.embeddings import OpenAIEmbeddings
-# from langchain.prompts import PromptTemplate
-from heuristic_experience_orchestrator.prompt_template_modification import PromptTemplate
+#from heuristic_experience_orchestrator.prompt_template_modification import PromptTemplate
 # from langchain.retrievers import TimeWeightedVectorStoreRetriever
 from langchain.schema import BaseLanguageModel, Document
-from langchain.vectorstores import FAISS, Pinecone
-from heuristic_experience_orchestrator.task_identification import TaskIdentificationChain
-
 import os
+
+from langchain.tools import GooglePlacesTool
+
 # nltk.download('punkt')
 import subprocess
 
 # database_url = os.environ.get('DATABASE_URL')
 # import nltk
-
-
+load_dotenv()
+from langchain.llms import Replicate
 OPENAI_MODEL = os.getenv("OPENAI_MODEL") or "gpt-3.5-turbo"
-
+GPLACES_API_KEY = "AIzaSyCAvRAf1eCJ27fTfjJauVgdhI5fodAFA_k"
 OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", 0.0))
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")
 PINECONE_API_ENV = os.getenv("PINECONE_API_ENV", "")
-
+REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN", "")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is missing from .env"
-
-
+import os
+os.environ["GPLACES_API_KEY"] = "AIzaSyCAvRAf1eCJ27fTfjJauVgdhI5fodAFA_k"
+pinecone.init(api_key="4e0982ad-57d5-41ac-bce5-d1fd2c2da273", environment="us-west1-gcp")
 class Agent():
-    def __init__(self, table_name=None, user_id: Optional[str] = None, session_id: Optional[str] = None) -> None:
+    def __init__(self, table_name=None, user_id: Optional[str] = "user123", session_id: Optional[str] = None) -> None:
         self.table_name = table_name
         self.user_id = user_id
         self.session_id = session_id
         self.memory = None
         self.thought_id_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]  # Timestamp with millisecond precision
         self.last_message = ""
-        self.llm =  OpenAI(temperature=0.0,openai_api_key = OPENAI_API_KEY)
+        self.llm = OpenAI(temperature=0.0,max_tokens = 1000, openai_api_key = OPENAI_API_KEY)
+        self.replicate_llm = Replicate(model="replicate/vicuna-13b:a68b84083b703ab3d5fbf31b6e25f16be2988e4c3e21fe79c2ff1c18b99e61c1")
         self.verbose: bool = True
         self.openai_model = "gpt-3.5-turbo"
         self.openai_temperature = 0.0
+        self.index = "my-agent"
 
-    def openai_call(self,
-            prompt: str,
-            model: str = OPENAI_MODEL,
-            temperature: float = OPENAI_TEMPERATURE,
-            max_tokens: int = 2000,
-    ):
-        while True:
-            try:
-                if model.startswith("llama"):
-                    # Spawn a subprocess to run llama.cpp
-                    cmd = ["llama/main", "-p", prompt]
-                    result = subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                                            text=True)
-                    return result.stdout.strip()
-                else:
-                    # Use chat completion API
-                    messages = [
-                        {"role": "system",
-                         "content": "You are an intelligent agent with thoughts and memories. You have a memory which stores your past thoughts and actions and also how other users have interacted with you."},
-                        {"role": "system", "content": "Keep your thoughts relatively simple and concise"},
-                        {"role": "user", "content": prompt},
-                    ]
-                    response = openai.ChatCompletion.create(
-                        model=model,
-                        messages=messages,
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                        n=1,
-                        stop=None,
-                    )
-                    return response.choices[0].message.content
-            except openai.error.RateLimitError:
-                print(
-                    "The OpenAI API rate limit has been exceeded. Waiting 10 seconds and trying again."
-                )
-                time.sleep(10)  # Wait 10 seconds and try again
-            else:
-                break
+    def test_places(self):
+        places = GooglePlacesTool()
+        print(places.run("indian food"))
+
+    def test_replicate(self):
+        start_time = time.time()
+        bb = self.replicate_llm("""             Help me choose what food choice, order, restaurant or a recipe to eat or make for my next meal.     
+                There are 'health', 'time', 'cost' factors I want to consider.
+                
+                For 'health', I want the meal to be '85' points on a scale of 1 to 100 points.
+                
+                For 'time', I want the meal to be '75' points on a scale of 1 to 100 points.
+                
+                For 'cost', I want the meal to be '50' points on a scale of 1 to 100 points.
+                
+                Instructions and ingredients should be detailed.  Result type can be Recipe, but not Meal
+                Answer with a result in a correct  python dictionary that is properly formatted that contains the following keys and must have  values
+                "Result type",  "body" which should contain "title", "rating", "prep_time", "cook_time", "description", "ingredients", "instructions" 
+                The values in JSON should not repeat
+                """)
+        time.sleep(15)
+        end_time = time.time()
+
+        execution_time = end_time - start_time
+        print("Execution time: ", execution_time, " seconds")
+        return print(bb)
     def set_user_session(self, user_id: str, session_id: str) -> None:
         self.user_id = user_id
         self.session_id = session_id
 
     def get_ada_embedding(self, text):
         text = text.replace("\n", " ")
-        return openai.Embedding.create(input=[text], model="text-embedding-ada-002")[
+        return openai.Embedding.create(input=[text], model="text-embedding-ada-002",api_key =OPENAI_API_KEY)[
             "data"
         ][0]["embedding"]
 
-    def init_pinecone(self):
+    def init_pinecone(self, index_name):
             pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_API_ENV)
-            index_name = "my-agent"
-            self.memory = pinecone.Index(index_name)
-
-    # this is code the get data from pinecone with similarity search, should be redone
-
-    # def create_new_memory_retriever():
-    #     """Create a new vector store retriever unique to the agent."""
-    #     # Define your embedding model
-    #     embeddings_model = OpenAIEmbeddings(openai_api_key = "")
-    #     # Initialize the vectorstore as empty
-
-    #     pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_API_ENV)
-    #     index_name = "my-agent"
-    #     embeddings = OpenAIEmbeddings(openai_api_key = ")
-    #     embedding_size = 1536
-    #     # index = faiss.IndexFlatL2(embedding_size)
-    #     vectorstore = Pinecone.from_existing_index( index_name, embeddings)
-    #     return TimeWeightedVectorStoreRetriever(vectorstore=vectorstore, decay_rate=.0000000000000000000000001, k=15)
-
-    # aa = create_new_memory_retriever()
-    #
-    # query = "What did the president say about Ketanji Brown Jackson"
-    # docs = aa.get_relevant_documents(query)
-    # memory_retriever= TimeWeightedVectorStoreRetriever
-
-    # def fetch_memories(self, observation: str) -> List[Document]:
-    #     """Fetch related memories."""
-    #     return self.memory_retriever.get_relevant_documents(observation)
-    #
-
-    #
-    # prompt = PromptTemplate(
-    #     input_variables=["product"],
-    #     template="What is a good name for a company that makes {product}?",
-    # )
-    #
+            return pinecone.Index(index_name)
     def _update_memories(self, observation: str, namespace: str):
         # Fetch related characteristics
+        memory = self.init_pinecone(index_name=self.index)
+
         vector = self.get_ada_embedding(observation)
-        upsert_response = self.memory.upsert(
+        upsert_response = memory.upsert(
             vectors=[
                 {
                     'id': f"thought-{self.thought_id_timestamp}",
@@ -166,14 +105,16 @@ class Agent():
                 }],
             namespace=namespace,
         )
+        return upsert_response
 
     def _fetch_memories(self, observation: str, namespace:str) -> List[Document]:
           #"""Fetch related characteristics, preferences or dislikes for a user."""
         query_embedding = self.get_ada_embedding(observation)
-        self.memory.query(query_embedding, top_k=1, include_metadata=True, namespace=namespace,
+        memory = self.init_pinecone(index_name=self.index)
+        memory.query(query_embedding, top_k=1, include_metadata=True, namespace=namespace,
                           filter={'user_id': {'$eq': self.user_id}})
     #     return self.memory_retriever.get_relevant_documents(observation)
-    def _compute_agent_summary(self):
+    def _compute_agent_summary(self, model_speed:str):
         """Computes summary for a person"""
         prompt = PromptTemplate.from_template(
             "How would you summarize {name}'s core characteristics given the"
@@ -184,14 +125,18 @@ class Agent():
             + "Do not embellish."
             + "\n\nSummary: "
         )
-        self.init_pinecone()
+        self.init_pinecone(index_name=self.index)
         # The agent seeks to think about their core characteristics.
         relevant_characteristics = self._fetch_memories(f"Users core characteristics", namespace="TRAITS")
         relevant_preferences = self._fetch_memories(f"Users core preferences", namespace="PREFERENCES")
         relevant_dislikes = self._fetch_memories(f"Users core dislikes", namespace="DISLIKES")
-        chain = LLMChain(llm=self.llm, prompt=prompt, verbose=self.verbose)
+        if model_speed =='fast':
+            output = self.replicate_llm(prompt)
+            return output
 
-        return chain.run(name= self.user_id, relevant_characteristics=relevant_characteristics, relevant_preferences=relevant_preferences, relevant_dislikes=relevant_dislikes).strip()
+        else:
+            chain = LLMChain(llm=self.llm, prompt=prompt, verbose=self.verbose)
+            return chain.run(name= self.user_id, relevant_characteristics=relevant_characteristics, relevant_preferences=relevant_preferences, relevant_dislikes=relevant_dislikes).strip()
 
 
 
@@ -202,11 +147,10 @@ class Agent():
                 Update user preferences and return a list of preferences
             Do not embellish.
             Summary: """
-        self.init_pinecone()
+        self.init_pinecone(index_name=self.index)
         past_preference = self._fetch_memories(f"Users core preferences", namespace="PREFERENCES")
         prompt = PromptTemplate(input_variables=["name", "past_preference", "preferences"], template=prompt)
         prompt = prompt.format(name=self.user_id, past_preference= past_preference, preferences=preferences)
-
         return self._update_memories(prompt, namespace="PREFERENCES")
 
     def update_agent_taboos(self, dislikes:str):
@@ -215,26 +159,24 @@ class Agent():
                 Update user taboos and return a list of taboos
             Do not embellish.
             Summary: """
-        self.init_pinecone()
+        self.init_pinecone(index_name=self.index)
         past_dislikes = self._fetch_memories(f"Users core dislikes", namespace="DISLIKES")
-        prompt = PromptTemplate(input_variables=["name", "past_preference", "preferences"], template=prompt)
+        prompt = PromptTemplate(input_variables=["name", "past_dislikes", "dislikes"], template=prompt)
         prompt = prompt.format(name=self.user_id, past_dislikes= past_dislikes, dislikes=dislikes)
-
         return self._update_memories(prompt, namespace="DISLIKES")
 
 
     def update_agent_traits(self, traits:str):
         """Serves to update agent traits so that they can be used in summary"""
         prompt =""" The {name} has following {past_traits} and the new {traits}
-                Update user taboos and return a list of taboos
+                Update user traits and return a list of traits
             Do not embellish.
             Summary: """
-        self.init_pinecone()
-        past_traits = self._fetch_memories(f"Users core dislikes", namespace="DISLIKES")
+        self.init_pinecone(index_name=self.index)
+        past_traits = self._fetch_memories(f"Users core dislikes", namespace="TRAITS")
         prompt = PromptTemplate(input_variables=["name", "past_traits", "traits"], template=prompt)
-        prompt = prompt.format(name=self.user_id, past_traits= past_traits, dislikes=traits)
-
-        return self._update_memories(prompt, namespace="DISLIKES")
+        prompt = prompt.format(name=self.user_id, past_traits= past_traits, traits=traits)
+        return self._update_memories(prompt, namespace="TRAITS")
 
 
     def update_agent_summary(self):
@@ -244,7 +186,7 @@ class Agent():
 
     def task_identification(self, goals:str):
         """Serves to update agent traits so that they can be used in summary"""
-        self.init_pinecone()
+        self.init_pinecone(index_name=self.index)
         agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
         complete_query = str(agent_summary) + goals
         complete_query = PromptTemplate.from_template(complete_query)
@@ -256,161 +198,86 @@ class Agent():
         return chain_output
 
 
-    def solution_generation(self, factors:dict):
-        """Serves to update agent traits so that they can be used in summary"""
+    def solution_generation(self, factors:dict, model_speed:str):
+        """Generates a recipe solution in json"""
+        import time
 
-
+        start_time = time.time()
         prompt = """
-        Hey ChatGPT, I need your help choosing what to eat for my next meal.
-        There are {% for factor, value in factors.items() %}'{{ factor }}'{% if not loop.last %}, {% endif %}{% endfor %} factors I want to consider.
-        {% for factor, value in factors.items() %}
-        For '{{ factor }}', I want the meal to be '{{ value }}' points on a scale of 1 to 100 points{% if not loop.last %}.{% else %}.{% endif %}
-        {% endfor %}
-        
-        However, I want you to make six assumptions that would allow you to come up with one suggestion for me. 
-      They should be very short, be very specific. Instructions and ingredients should not be shortened. I have cooking skills and access to basic cooking equipment, it should not be an assumption. 
-      If flavors and cuisines are mentioned, one cuisine should be chosen based on ChatGPT preferences without stating it's ChatGPT favourite. 
-      Answer with a JSON array that follows the following structure
-      {
-            "Result type": "Recipe",
-            "Assumptions": ["Vegetarian", "Gluten-free", "Low-carb"],
-            "Body": {
-              "title": "Name of the result",
-              "rating": 4.8,
-              "image_link": "image link of the product",
-              "prep_time": "prep time in minutes" ,
-              "cook_time": "cook time in minutes" ,
-              "description": "Product description",
-              "ingredients": [
-                "1 large ingredient",
-                "2 other ingredieents"
-              ],
-              "instructions": [
-                "Do something",
-                "Do something else",
-                "Do even more"
-              ]
-            }
-          }
-      """
-        import json
-        json_str = json.dumps( {
-            "Result type": "Recipe",
-            "Assumptions": ["Vegetarian", "Gluten-free", "Low-carb"],
-            "Body": {
-              "title": "Name of the result",
-              "rating": 4.8,
-              "image_link": "image link of the product",
-              "prep_time": "prep time in minutes" ,
-              "cook_time": "cook time in minutes" ,
-              "description": "Product description",
-              "ingredients": [
-                "1 large ingredient",
-                "2 other ingredieents"
-              ],
-              "instructions": [
-                "Do something",
-                "Do something else",
-                "Do even more"
-              ]
-            }
-          })
-
-        input_data = [
-            {"Recipe": json_str}
-        ]
-
-        # json_spec = JsonSpec(dict_=data, max_value_length=4000)
-        # json_toolkit = JsonToolkit(spec=json_spec)
-        #
-        # json_agent_executor = create_json_agent(
-        #     llm=self.llm,
-        #     toolkit=json_toolkit,
-        #     verbose=True
-        # )
-        self.init_pinecone()
+                Help me choose what food choice, order, restaurant or a recipe to eat or make for my next meal.     
+                There are {% for factor, value in factors.items() %}'{{ factor }}'{% if not loop.last %}, {% endif %}{% endfor %} factors I want to consider.
+                {% for factor, value in factors.items() %}
+                For '{{ factor }}', I want the meal to be '{{ value }}' points on a scale of 1 to 100 points{% if not loop.last %}.{% else %}.{% endif %}
+                {% endfor %}
+                Instructions and ingredients should be detailed.  Result type can be Recipe, but not Meal
+                Answer with a result in a correct  python dictionary that is properly formatted that contains the following keys and must have  values
+                "Result type",  "body" which should contain "title", "rating", "prep_time", "cook_time", "description", "ingredients", "instructions"
+        """
+        self.init_pinecone(index_name=self.index)
         agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
-        from langchain.prompts.base import StringPromptTemplate
-
         template = Template(prompt)
         output = template.render(factors=factors)
         complete_query = str(agent_summary) + output
+        # complete_query =  output
+        complete_query = PromptTemplate.from_template(complete_query)
 
-        chain_output = self.openai_call(complete_query)
-        return chain_output
-        # # complete_query = PromptTemplate.from_template(complete_query)
-        # complete_query = PromptTemplate.from_template(complete_query)
-        #
-        # # json_agent_executor.run(complete_query)
-        # chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
-        # aa = chain.run(input_data=input_data, name=self.user_id).strip()
-        # return print(aa)
+        if model_speed =='fast':
+            output = self.replicate_llm(output)
+            return output
+        else:
+            chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
+            chain_result = chain.run(prompt=complete_query, name=self.user_id).strip()
+            end_time = time.time()
 
-    def goal_optimization(self, factors: dict):
+            execution_time = end_time - start_time
+            print("Execution time: ", execution_time, " seconds")
+            return chain_result
+
+    def goal_optimization(self, factors: dict, model_speed:str):
         """Serves to optimize agent goals"""
 
         prompt = """
               Based on all the history and information of this user, suggest three goals that are personal to him that he should apply to optimize his time.
               Only JSON values should be the output, don't write anything extra, no warnings no explanations. 
               Make sure to provide data in the following format
-              {
-                "Goals": [
-                  {
-                    "name": "Vegetarian",
-                    "min": 0,
-                    "max": 1,
-                    "unit_name": "",
-                    "option_array": [
-                      "Yes",
-                      "No"
-                    ]
-                  },
-                  {
-                    "name": "Gluten-free",
-                    "min": 0,
-                    "max": 1,
-                    "unit_name": "",
-                    "option_array": [
-                      "Yes",
-                      "No"
-                    ]
-                  },
-                  {
-                    "name": "Low-carb",
-                    "min": 0,
-                    "max": 100,
-                    "unit_name": "g",
-                    "option_array": []
-                  }
-                ]
-              }
+                         Answer with a result in a correct  python dictionary that is properly formatted that contains the following keys and must have  values     
+              Goals containing 'body' that has multiple 'name', 'min', 'max', 'unit_name', 'option_array', 'name', 'min', 'max', 'unit_name', 'option_array', 'name', 'min', 'max', 'unit_name', 'option_array'
             """
-        # json_spec = JsonSpec(dict_=data, max_value_length=4000)
-        # json_toolkit = JsonToolkit(spec=json_spec)
-        #
-        # json_agent_executor = create_json_agent(
-        #     llm=self.llm,
-        #     toolkit=json_toolkit,
-        #     verbose=True
-        # )
-        self.init_pinecone()
-        agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
-        from langchain.prompts.base import StringPromptTemplate
 
+        self.init_pinecone(index_name=self.index)
+        agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
         template = Template(prompt)
         output = template.render(factors=factors)
         complete_query = str(agent_summary) + output
+        if model_speed =='fast':
+            output = self.replicate_llm(output)
+            return output
+        else:
+            chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
+            chain_result = chain.run(prompt=complete_query, name=self.user_id).strip()
+            return chain_result
 
-        call_output = self.openai_call(complete_query)
-        return call_output
-        # # complete_query = PromptTemplate.from_template(complete_query)
-        # complete_query = PromptTemplate.from_template(complete_query)
-        #
-        # # json_agent_executor.run(complete_query)
-        # chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
-        # aa = chain.run(input_data=input_data, name=self.user_id).strip()
-        # return print(aa)
 
+    def restaurant(self, factors: dict, model_speed:str):
+        """Serves to optimize agent goals"""
+
+        prompt = """
+              Based on the following factors
+              
+            """
+
+        self.init_pinecone(index_name=self.index)
+        agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
+        template = Template(prompt)
+        output = template.render(factors=factors)
+        complete_query = str(agent_summary) + output
+        if model_speed =='fast':
+            output = self.replicate_llm(output)
+            return output
+        else:
+            chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
+            chain_result = chain.run(prompt=complete_query, name=self.user_id).strip()
+            return chain_result
     def solution_evaluation_test(self):
         """Serves to update agent traits so that they can be used in summary"""
         return
@@ -432,7 +299,9 @@ class Agent():
 
 if __name__ == "__main__":
     agent = Agent()
-    # agent.task_identification("I need your help choosing what to eat for my next meal. ")
-    # agent.goal_optimization( {    'health': 85,
+    agent.test_places()
+    # agent._update_memories("lazy, stupid and hungry", "TRAITS")
+    #agent.task_identification("I need your help choosing what to eat for my next meal. ")
+    # agent.solution_generation( {    'health': 85,
     # 'time': 75,
-    # 'cost': 50,})
+    # 'cost': 50}, model_speed="slow")
