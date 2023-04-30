@@ -1,10 +1,12 @@
-# Teenage-AGI-Chef
+# PromethAI
 
-Teenage-AGI-Chef is a Python-based AGI (artificial general intelligence) project that recommends food choices based on a user's goals and preferences, and can modify its recommendations based on user feedback. The project is built on top of an existing AGI project that uses OpenAI and Pinecone to give memory to the AI agent, and allows it to "think" before making an action (outputting text).
+PromethAI is a Python-based AGI (artificial general intelligence) project that recommends food choices based on a user's goals and preferences, and can modify its recommendations based on user feedback.
+The project is built on top of an existing AGI project, and redone using Langchain library that uses OpenAI and Pinecone to give memory to the AI agent, and allows it to "think" before making an action (outputting text).
 
-In the modified version, which we can call "Teenage-AGI-Chef", the original project has been adapted to focus on food recommendations. The AI agent now has the ability to suggest meal options based on a user's specified goal, such as a fast meal, a tasty meal, or a healthy meal. It also has the ability to retrieve a list of restaurants from Google Maps and suggest matching food options based on the user's preferences.
+In the modified version, which we can call "PromethAI", the original project has been adapted to focus on food recommendations. The AI agent now has the ability to suggest meal options based on a user's specified goal, 
+such as a fast meal, a tasty meal, or a healthy meal. It also has the ability to retrieve a list of restaurants from Google Maps and suggest matching food options based on the user's preferences.
 
-Overall, Teenage-AGI-Chef is a practical application of AGI technology that has the potential to help users make informed food choices based on their goals and preferences.
+Overall, PromethAI is a practical application of AGI technology that has the potential to help users make informed food choices based on their goals and preferences.
 
 Credits: 
 Teenage AGI -> https://github.com/seanpixel/Teenage-AGI
@@ -12,24 +14,15 @@ Baby AGI -> https://github.com/yoheinakajima/babyagi
 
 
 ## Objective
-Inspired by the several Auto-GPT related Projects (predominently BabyAGI) and the Paper ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442), the original python project uses OpenAI and Pinecone to Give memory to an AI agent and also allows it to "think" before making an action (outputting text). Also, just by shutting down the AI, it doesn't forget its memories since it lives on Pinecone and its memory_counter saves the index that its on.
+Inspired by the several Auto-GPT related Projects (predominently BabyAGI) and the Paper ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442), the original python project uses OpenAI and Pinecone to Give memory to an AI agent and also allows it to "think" before making an action (outputting text). 
 
 
-## Instructions
-API_ENABLED switches between API and version that works 
-docker-compose build --build-arg API_ENABLED=False teenage-agi
+## Quick start 
+API_ENABLED switches between API and version that works using commandline 
+
+```docker-compose build --build-arg API_ENABLED=True teenage-agi```
 
 
-
-## Updates
-April 12: Added "read" and "think" commands. Add "read: " or "think: " in front of a query to feed it information using read (any length works) or insert a memory into agent.
-
-### Sections
-- [How it Works](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-it-works)
-- [How to Use](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-to-use)
-- [Experiments](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#experiments)
-- [More About Project & Me](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#how-to-use)
-- [Credits](https://github.com/seanpixel/Teenage-AGI/blob/main/README.md#credits)
 
 ## How it Works
 Here is what happens everytime the AI is queried by the user:
@@ -44,21 +37,25 @@ Here is what happens everytime the AI is queried by the user:
 1. Clone the repository via `git clone https://github.com/seanpixel/Teenage-AGI.git` and cd into the cloned repository.
 2. Install required packages by doing: pip install -r requirements.txt
 3. Create a .env file from the template `cp .env.template .env`
-4. `open .env` and set your OpenAI and Pinecone API info.
-5. Run `python main.py` and talk to the AI in the terminal
+4. `open .env` and set your OpenAI and Pinecone API, Google Maps API key and Replicate API token
+5. Run the script by launching a docker container with
+```
+docker-compose build --build-arg API_ENABLED=True teenage-agi
+```
+6. Access the API by doing CURL requests, example: 
+```
+curl -X POST "http://0.0.0.0:8000/data-request" -H "Content-Type: application/json" --data-raw 
+
+```
+## List of available endpoints
+
+```
+POST /variate-diet-assumption
+POST /variate-food-goal
+POST /recipe-request
+POST /optimize-diet-goal
+```
+All endpoints receive a payload in JSON format and return a response in JSON format.
 
 ## Running in a docker container
 You can run the system isolated in a container using docker-compose:
-```
-docker-compose up teenage-agi
-```
-curl -X POST "http://0.0.0.0:8000/data-request" -H "Content-Type: application/json" --data-raw '{"payload": {"user_id": "657", "session_id": "456", "factor_1": "90 minutes", "factor_2": "cost", "factor_3": "health", "factor_2_option": "cheap", "factor_3_option":"very healthy",   "query": "Who is best doctor in Kenya"}}'
-
-## Experiments
-Currently, using GPT-4, I found that it can remember its name and other characteristics. It also carries on the conversation quite well without a context window (although I might add it soon). I will update this section as I keep playing with it.
-
-## More about the Project & Me
-After reading the Simulcra paper, I made this project in my college dorm. I realized that most of the "language" that I generate are inside my head, so I thought maybe it would make sense if AGI does as well. I'm a founder currently runing a startup called [DSNR]([url](https://www.dsnr.ai/)) and also a first-year at USC. Contact me on [twitter](https://twitter.com/sean_pixel) about anything would love to chat.
-
-## Credits
-Thank you to [@yoheinakajima](https://twitter.com/yoheinakajima) and the team behind ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442) for the idea!

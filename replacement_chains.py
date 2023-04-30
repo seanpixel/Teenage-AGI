@@ -14,6 +14,7 @@ from langchain import LLMChain
 # from langchain.retrievers import TimeWeightedVectorStoreRetriever
 from langchain.schema import BaseLanguageModel, Document
 import os
+from food_scrapers import wolt_tool
 
 from langchain.tools import GooglePlacesTool
 
@@ -33,7 +34,7 @@ PINECONE_API_ENV = os.getenv("PINECONE_API_ENV", "")
 REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN", "")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is missing from .env"
 import os
-os.environ["GPLACES_API_KEY"] = None
+os.environ["GPLACES_API_KEY"] = os.getenv("GPLACES_API_KEY", "")
 
 class Agent():
     def __init__(self, table_name=None, user_id: Optional[str] = "user123", session_id: Optional[str] = None) -> None:
@@ -49,10 +50,6 @@ class Agent():
         self.openai_model = "gpt-3.5-turbo"
         self.openai_temperature = 0.0
         self.index = "my-agent"
-
-    def test_places(self):
-        places = GooglePlacesTool()
-        print(places.run("indian food"))
 
     def test_replicate(self):
         start_time = time.time()
@@ -258,12 +255,13 @@ class Agent():
             return chain_result
 
 
-    def restaurant(self, factors: dict, model_speed:str):
+    def restaurant_recommendation(self, factors: dict):
         """Serves to optimize agent goals"""
 
         prompt = """
-              Based on the following factors
-              
+              Based on the following factors, There are {% for factor, value in factors.items() %}'{{ factor }}'{% if not loop.last %}, {% endif %}{% endfor %} factors I want to consider.
+                {% for factor, value in factors.items() %}
+                Determine the type of restaurant you should offer to a customer. Make the reccomendation very short and to a point, as if it is something you would type on google maps
             """
 
         self.init_pinecone(index_name=self.index)
@@ -271,13 +269,26 @@ class Agent():
         template = Template(prompt)
         output = template.render(factors=factors)
         complete_query = str(agent_summary) + output
-        if model_speed =='fast':
-            output = self.replicate_llm(output)
-            return output
-        else:
-            chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
-            chain_result = chain.run(prompt=complete_query, name=self.user_id).strip()
-            return chain_result
+        places = GooglePlacesTool()
+        output = places.run(complete_query)
+        return output
+
+    def delivery_recommendation(self, factors: dict, model_speed:str):
+        """Serves to optimize agent goals"""
+
+        prompt = """
+              Based on the following factors, There are {% for factor, value in factors.items() %}'{{ factor }}'{% if not loop.last %}, {% endif %}{% endfor %} factors I want to consider.
+                {% for factor, value in factors.items() %}
+                Determine the type of food you would want to recommend to the user, that is commonly ordered online. It should be like burger or pizza
+            """
+
+        self.init_pinecone(index_name=self.index)
+        agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
+        template = Template(prompt)
+        output = template.render(factors=factors)
+        complete_query = str(agent_summary) + output
+        return wolt_tool.main(complete_query)
+
     def solution_evaluation_test(self):
         """Serves to update agent traits so that they can be used in summary"""
         return
