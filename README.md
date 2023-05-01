@@ -49,11 +49,16 @@ curl -X POST "http://0.0.0.0:8000/data-request" -H "Content-Type: application/js
 ```
 ## List of available endpoints
 
+The available endpoints in the provided code are:
 ```
-POST /variate-diet-assumption
-POST /variate-food-goal
-POST /recipe-request
-POST /optimize-diet-goal
+POST request to '/variate-diet-assumption' endpoint that takes a JSON payload containing 'user_id', 'session_id' and 'variate_assumption' keys, and returns a JSON response with a 'response' key.
+POST request to '/variate-food-goal' endpoint that takes a JSON payload containing 'user_id', 'session_id', 'factors', and 'variate_goal' keys, and returns a JSON response with a 'response' key.
+POST request to '/recipe-request' endpoint that takes a JSON payload containing 'user_id', 'session_id', 'factors' keys, and returns a JSON response with a 'response' key.
+POST request to '/restaurant-request' endpoint that takes a JSON payload containing 'user_id', 'session_id', 'factors' keys, and returns a JSON response with a 'response' key.
+POST request to '/delivery-request' endpoint that takes a JSON payload containing 'user_id', 'session_id', 'factors', and 'zipcode' keys, and returns a JSON response with a 'response' key.
+POST request to '/solution-request' endpoint that takes a JSON payload containing 'user_id', 'session_id', 'factors', and 'model_speed' keys, and returns a JSON response with a 'response' key.
+POST request to '/generate-diet-goal' endpoint that takes a JSON payload containing 'user_id', 'session_id', and 'model_speed' keys, and returns a JSON response with a 'response' key.
+POST request to '/generate-diet-sub-goal' endpoint that takes a JSON payload containing 'user_id', 'session_id', 'factors', and 'model_speed' keys, and returns a JSON response with a 'response' key.
 ```
 All endpoints receive a payload in JSON format and return a response in JSON format.
 
