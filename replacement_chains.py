@@ -327,12 +327,16 @@ class Agent():
             return json_data
 
     def extract_info(self, s):
-        name, address, phone, website = re.findall(r'^(.+)\nAddress: (.+)\nPhone: (.+)\nWebsite: (.+)\n$', s)[0]
+        lines = s.split('\n')
+        name = lines[0]
+        address = lines[1].replace('Address: ', '')
+        phone = lines[2].replace('Phone: ', '')
+        website = lines[3].replace('Website: ', '')
         return {
             'name': name,
             'address': address,
             'phone': phone,
-            'website': website
+            'website': website,
         }
     def restaurant_generation(self, factors: dict, model_speed:str):
         """Serves to suggest a restaurant to the agent"""
@@ -356,7 +360,6 @@ class Agent():
         chain_result = chain.run(prompt=complete_query).strip()
         places = GooglePlacesTool()
         output = places.run(chain_result)
-        import re
         restaurants = re.split(r'\d+\.', output)[1:3]
         # Create a list of dictionaries for each restaurant
         restaurant_list = [self.extract_info(r) for r in restaurants]
@@ -366,13 +369,14 @@ class Agent():
         print('HERE IS THE OUTPUT', json_output)
         return json_output
 
-    def delivery_recommendation(self, factors: dict, model_speed:str):
-        """Serves to optimize agent goals"""
+    def delivery_generation(self, factors: dict, zipcode:str, model_speed:str):
+        """Serves to optimize agent delivery recommendations"""
 
         prompt = """
               Based on the following factors, There are {% for factor, value in factors.items() %}'{{ factor }}'{% if not loop.last %}, {% endif %}{% endfor %} factors I want to consider.
                 {% for factor, value in factors.items() %}
-                Determine the type of food you would want to recommend to the user, that is commonly ordered online. It should be like burger or pizza
+                Determine the type of food you would want to recommend to the user, that is commonly ordered online. It should be like burger or pizza or something you search on food delivery app. 
+                The response should be very short
             """
 
         self.init_pinecone(index_name=self.index)
@@ -380,7 +384,11 @@ class Agent():
         template = Template(prompt)
         output = template.render(factors=factors)
         complete_query = str(agent_summary) + output
-        return wolt_tool.main(complete_query)
+        complete_query = PromptTemplate.from_template(complete_query)
+        chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
+        chain_result = chain.run(prompt=complete_query).strip()
+
+        return wolt_tool.main(zipcode, chain_result)
 
     def solution_evaluation_test(self):
         """Serves to update agent traits so that they can be used in summary"""

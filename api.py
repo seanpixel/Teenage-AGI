@@ -110,6 +110,18 @@ async def restaurant_request(request_data: Payload) -> dict:
     # Return a JSON response with the new dictionary
     return JSONResponse(content=stripped_string_dict)
 
+
+@app.post("/delivery-request", response_model=dict)
+async def delivery_request(request_data: Payload) -> dict:
+    json_payload = request_data.payload
+    factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
+    agent = Agent()
+    agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent.delivery_generation(factors_dict, zipcode=json_payload["zipcode"], model_speed="slow")
+
+    stripped_string_dict = {"response": output}
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
 @app.post("/solution-request", response_model=dict)
 async def solution_request(request_data: Payload) -> dict:
     json_payload = request_data.payload
