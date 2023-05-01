@@ -12,7 +12,7 @@ def enter_zipcode_and_press_enter(page, zipcode):
     element = page.locator(input_selector)
     element.fill(zipcode)
 
-def run(playwright, prompt:str):
+def run(playwright, zipcode:str, prompt:str):
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
@@ -27,7 +27,7 @@ def run(playwright, prompt:str):
     }
     find_and_click_by_attributes(page, button_attributes)
 
-    zipcode = "10317"
+
     enter_zipcode_and_press_enter(page, zipcode)
     page.wait_for_load_state("networkidle")
     page.press('input[data-test-id="FrontpageAddressQueryInput"]', 'Enter')
@@ -46,7 +46,7 @@ def run(playwright, prompt:str):
 
     def main(prompt:str):
         with sync_playwright() as playwright:
-            run(playwright, prompt)
+            run(playwright, zipcode, prompt)
 
 
 

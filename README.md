@@ -57,5 +57,63 @@ POST /optimize-diet-goal
 ```
 All endpoints receive a payload in JSON format and return a response in JSON format.
 
-## Running in a docker container
-You can run the system isolated in a container using docker-compose:
+Example of curl requests
+```
+curl --location --request POST 'http://0.0.0.0:8000/recipe-request' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "payload": {
+    "user_id": "657",
+    "session_id": "456",
+    "model_speed":"slow",
+    "factors": [
+      {
+        "name": "time",
+        "amount": 90
+      },
+      {
+        "name": "cost",
+        "amount": 50
+      },
+      {
+        "name": "health",
+        "amount": 95
+      }
+    ]
+  }
+}'
+```
+
+```
+curl --location --request POST 'http://0.0.0.0:8000/generate-diet-goal' \
+--header 'Content-Type: application/json' \
+--data-raw '{"payload": {"user_id": "658", "session_id": "457", "model_speed":"slow"}}'
+```
+```
+curl --location --request POST 'http://0.0.0.0:8000/variate-assumption' \
+--header 'Content-Type: application/json' \
+--data-raw '{"payload": {"user_id": "657", "session_id": "456", "variate_assumption": "Remove {{Assumption}} from the list of assumptions"}}'
+```
+
+```
+curl --location --request POST 'http://0.0.0.0:8000/generate-diet-sub-goal' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "payload": {
+    "user_id": "657",
+    "session_id": "456",
+    "model_speed": "slow",
+    "factors": [
+      {
+        "name": "Portion Control"
+      },
+      {
+        "name": "Cuisine"
+      },
+      {
+        "name": "Macronutrients"
+      }
+    ]
+  }
+}'
+```
