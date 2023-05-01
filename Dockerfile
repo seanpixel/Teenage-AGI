@@ -19,6 +19,7 @@ RUN poetry config virtualenvs.create false && \
     poetry install --no-root --no-dev
 
 RUN playwright install
+RUN playwright install-deps
 
 WORKDIR /app
 COPY . /app

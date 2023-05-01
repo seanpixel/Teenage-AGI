@@ -1,55 +1,56 @@
 
-from playwright.sync_api import sync_playwright
-def find_and_click_by_attributes(page, attributes):
+from playwright.async_api import async_playwright, Playwright
+
+async def find_and_click_by_attributes(page, attributes):
     selector = "button"
     for attr, value in attributes.items():
         selector += f'[{attr}="{value}"]'
     element = page.locator(selector)
-    element.click()
+    await element.click()
 
-def enter_zipcode_and_press_enter(page, zipcode):
+async def enter_zipcode_and_press_enter(page, zipcode):
     input_selector = 'input[data-test-id="FrontpageAddressQueryInput"]'
     element = page.locator(input_selector)
-    element.fill(zipcode)
+    await element.fill(zipcode)
+    await element.press("Enter")
 
-def run(playwright, zipcode:str, prompt:str):
-    browser = playwright.chromium.launch(headless=True)
-    context = browser.new_context()
-    page = context.new_page()
+async def run(playwright, zipcode:str, prompt:str):
+    browser = await playwright.chromium.launch(headless=True)
+    context = await browser.new_context()
+    page = await context.new_page()
 
     # Navigate to wolt.com
-    page.goto("https://wolt.com")
+    await page.goto("https://wolt.com")
     button_attributes = {
         "aria-disabled": "false",
         "role": "button",
         "type": "button",
         "data-localization-key": "gdpr-consents.banner.accept-button"
     }
-    find_and_click_by_attributes(page, button_attributes)
+    await find_and_click_by_attributes(page, button_attributes)
 
-
-    enter_zipcode_and_press_enter(page, zipcode)
-    page.wait_for_load_state("networkidle")
-    page.press('input[data-test-id="FrontpageAddressQueryInput"]', 'Enter')
-    page.wait_for_load_state("networkidle")
-    import time
-    time.sleep(2)
+    await enter_zipcode_and_press_enter(page, zipcode)
+    await page.wait_for_load_state("networkidle")
+    await page.press('input[data-test-id="FrontpageAddressQueryInput"]', 'Enter')
+    await page.wait_for_load_state("networkidle")
+    await page.wait_for_selector('[data-test-id="VenuesOnlySearchInput"]')
+    await page.wait_for_load_state("networkidle")
     search_input_selector = '[data-test-id="VenuesOnlySearchInput"]'
-    page.fill(search_input_selector, prompt)
-    page.press(search_input_selector, 'Enter')
-    time.sleep(2)
+    await page.wait_for_load_state("networkidle")
+    element = page.locator(search_input_selector)
+    await element.fill(prompt)
+    await page.press('input[data-test-id="VenuesOnlySearchInput"]', 'Enter')
+    await page.wait_for_load_state("networkidle")
 
     resulting_url = page.url
-    browser.close()
+    await browser.close()
 
     return resulting_url
 
-    def main(prompt:str):
-        with sync_playwright() as playwright:
-            run(playwright, zipcode, prompt)
-
-
-
-
-
-
+async def main(prompt:str, zipcode:str):
+    async with async_playwright() as playwright:
+        result = await run(playwright, zipcode, prompt)
+        print(result)
+        return result
+import asyncio
+# asyncio.run(main(prompt="pizza", zipcode="10005"))

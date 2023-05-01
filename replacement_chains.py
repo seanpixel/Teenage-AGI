@@ -1,5 +1,5 @@
 from langchain.prompts import PromptTemplate
-
+from concurrent.futures import ThreadPoolExecutor
 import pinecone
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
@@ -368,13 +368,17 @@ class Agent():
         json_output = json.dumps(restaurant_list)
         print('HERE IS THE OUTPUT', json_output)
         return json_output
-
-    def delivery_generation(self, factors: dict, zipcode:str, model_speed:str):
+    async def run_wolt_tool(self, zipcode, chain_result):
+        from food_scrapers import  wolt_tool
+        return wolt_tool.main(zipcode, chain_result)
+    async def delivery_generation(self, factors: dict, zipcode:str, model_speed:str):
         """Serves to optimize agent delivery recommendations"""
 
         prompt = """
               Based on the following factors, There are {% for factor, value in factors.items() %}'{{ factor }}'{% if not loop.last %}, {% endif %}{% endfor %} factors I want to consider.
                 {% for factor, value in factors.items() %}
+                For '{{ factor }}', I want the meal to be '{{ value }}' points on a scale of 1 to 100 points{% if not loop.last %}.{% else %}.{% endif %}
+                {% endfor %}
                 Determine the type of food you would want to recommend to the user, that is commonly ordered online. It should be like burger or pizza or something you search on food delivery app. 
                 The response should be very short
             """
@@ -387,8 +391,13 @@ class Agent():
         complete_query = PromptTemplate.from_template(complete_query)
         chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
         chain_result = chain.run(prompt=complete_query).strip()
-
-        return wolt_tool.main(zipcode, chain_result)
+        print("HERE IS THE PROMPT", chain_result)
+        import asyncio
+        from food_scrapers import wolt_tool
+        # with ThreadPoolExecutor() as executor:
+        #     loop = asyncio.get_running_loop()
+        output = await wolt_tool.main( zipcode, chain_result)
+        return output
 
     def solution_evaluation_test(self):
         """Serves to update agent traits so that they can be used in summary"""

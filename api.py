@@ -117,8 +117,8 @@ async def delivery_request(request_data: Payload) -> dict:
     factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
     agent = Agent()
     agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
-    output = agent.delivery_generation(factors_dict, zipcode=json_payload["zipcode"], model_speed="slow")
-
+    output = await agent.delivery_generation(factors_dict, zipcode=json_payload["zipcode"], model_speed="slow")
+    print("HERE IS THE OUTPUT", output)
     stripped_string_dict = {"response": output}
     # Return a JSON response with the new dictionary
     return JSONResponse(content=stripped_string_dict)
