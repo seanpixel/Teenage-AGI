@@ -80,7 +80,7 @@ async def recipe_request(request_data: Payload) -> dict:
     factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
     agent = Agent()
     agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
-    output = agent.solution_generation(factors_dict, model_speed="slow")
+    output = agent.recipe_generation(factors_dict, model_speed="slow")
     start = output.find('{')
     end = output.rfind('}')
     if start != -1 and end != -1:
@@ -92,15 +92,64 @@ async def recipe_request(request_data: Payload) -> dict:
     # Return a JSON response with the new dictionary
     return JSONResponse(content=stripped_string_dict)
 
-
-@app.post("/optimize-diet-goal", response_model=dict)
-async def optimize_diet_goal(request_data: Payload) -> dict:
+@app.post("/restaurant-request", response_model=dict)
+async def restaurant_request(request_data: Payload) -> dict:
     json_payload = request_data.payload
-    # factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
+    factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
     agent = Agent()
-    # agent_instance = establish_connection()
     agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
-    output = agent.goal_optimization({})
+    output = agent.restaurant_generation(factors_dict, model_speed="slow")
+    start = output.find('{')
+    end = output.rfind('}')
+    if start != -1 and end != -1:
+        stripped_string_output = output[start:end + 1]
+        print(stripped_string_output)
+    else:
+        print("No JSON data found in string.")
+    stripped_string_dict = {"response": stripped_string_output}
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
+
+@app.post("/solution-request", response_model=dict)
+async def solution_request(request_data: Payload) -> dict:
+    json_payload = request_data.payload
+    factors_dict = {factor['name']: factor['amount'] for factor in json_payload['factors']}
+    agent = Agent()
+    agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent.solution_generation(factors_dict, model_speed=json_payload["model_speed"])
+    start = output.find('{')
+    end = output.rfind('}')
+    if start != -1 and end != -1:
+        stripped_string_output = output[start:end + 1]
+        print(stripped_string_output)
+    else:
+        print("No JSON data found in string.")
+    stripped_string_dict = {"response": stripped_string_output}
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
+@app.post("/generate-diet-goal", response_model=dict)
+async def generate_diet_goal(request_data: Payload) -> dict:
+    json_payload = request_data.payload
+    agent = Agent()
+    agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent.goal_generation({}, model_speed= json_payload["model_speed"])
+    start = output.find('{')
+    end = output.rfind('}')
+    if start != -1 and end != -1:
+        stripped_string_output = output[start:end + 1]
+        print(stripped_string_output)
+    else:
+        print("No JSON data found in string.")
+    stripped_string_dict = {"response": stripped_string_output}
+    # Return a JSON response with the new dictionary
+    return JSONResponse(content=stripped_string_dict)
+
+@app.post("/generate-diet-sub-goal", response_model=dict)
+async def generate_diet_sub_goal(request_data: Payload) -> dict:
+    json_payload = request_data.payload
+    agent = Agent()
+    agent.set_user_session(json_payload["user_id"], json_payload["session_id"])
+    output = agent.sub_goal_generation(factors=json_payload["factors"], model_speed= json_payload["model_speed"])
     start = output.find('{')
     end = output.rfind('}')
     if start != -1 and end != -1:

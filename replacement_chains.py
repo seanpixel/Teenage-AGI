@@ -4,6 +4,7 @@ import pinecone
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 import openai
+import re
 import datetime
 from jinja2 import Template
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ from langchain import LLMChain
 from langchain.schema import BaseLanguageModel, Document
 import os
 from food_scrapers import wolt_tool
-
+import json
 from langchain.tools import GooglePlacesTool
 
 # nltk.download('punkt')
@@ -196,7 +197,7 @@ class Agent():
 
 
     def solution_generation(self, factors:dict, model_speed:str):
-        """Generates a recipe solution in json"""
+        """Generates a solution choice"""
         import time
 
         start_time = time.time()
@@ -208,7 +209,7 @@ class Agent():
                 {% endfor %}
                 Instructions and ingredients should be detailed.  Result type can be Recipe, but not Meal
                 Answer with a result in a correct  python dictionary that is properly formatted that contains the following keys and must have  values
-                "Result type",  "body" which should contain "title", "rating", "prep_time", "cook_time", "description", "ingredients", "instructions"
+                "Result type" should be "Solution proposal,  "body" which should contain "proposal" and the value of the proposal that should be order, restaurant or a recipe
         """
         self.init_pinecone(index_name=self.index)
         agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
@@ -220,7 +221,8 @@ class Agent():
 
         if model_speed =='fast':
             output = self.replicate_llm(output)
-            return output
+            json_data = json.dumps(output)
+            return json_data
         else:
             chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
             chain_result = chain.run(prompt=complete_query, name=self.user_id).strip()
@@ -228,39 +230,118 @@ class Agent():
 
             execution_time = end_time - start_time
             print("Execution time: ", execution_time, " seconds")
-            return chain_result
+            json_data = json.dumps(chain_result)
+            return json_data
+    def recipe_generation(self, factors:dict, model_speed:str):
+        """Generates a recipe solution in json"""
+        import time
 
-    def goal_optimization(self, factors: dict, model_speed:str):
+        start_time = time.time()
+        prompt = """
+                Help me choose what recipe to eat or make for my next meal.     
+                There are {% for factor, value in factors.items() %}'{{ factor }}'{% if not loop.last %}, {% endif %}{% endfor %} factors I want to consider.
+                {% for factor, value in factors.items() %}
+                For '{{ factor }}', I want the meal to be '{{ value }}' points on a scale of 1 to 100 points{% if not loop.last %}.{% else %}.{% endif %}
+                {% endfor %}
+                Instructions and ingredients should be detailed.
+                Answer with a result in a correct  python dictionary that is properly formatted that contains the following keys and must have  values
+                "Result type" should be "Recipe",  "body" which should contain "title", "rating", "prep_time", "cook_time", "description", "ingredients", "instructions"
+        """
+        self.init_pinecone(index_name=self.index)
+        agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
+        template = Template(prompt)
+        output = template.render(factors=factors)
+        complete_query = str(agent_summary) + output
+        # complete_query =  output
+        complete_query = PromptTemplate.from_template(complete_query)
+
+        if model_speed =='fast':
+            output = self.replicate_llm(output)
+            json_data = json.dumps(output)
+            return json_data
+        else:
+            chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
+            chain_result = chain.run(prompt=complete_query, name=self.user_id).strip()
+            end_time = time.time()
+
+            execution_time = end_time - start_time
+            print("Execution time: ", execution_time, " seconds")
+            json_data = json.dumps(chain_result)
+            return json_data
+    def goal_generation(self, factors: dict, model_speed:str):
         """Serves to optimize agent goals"""
 
         prompt = """
-              Based on all the history and information of this user, suggest three goals that are personal to him that he should apply to optimize his time.
-              Only JSON values should be the output, don't write anything extra, no warnings no explanations. 
+              Based on all the history and information of this user, suggest mind map that would have  four decision points that are personal to him that he should apply to optimize his decision choices related to food. The cuisine should be one of the points, and goal should contain one or maximum two words
               Make sure to provide data in the following format
-                         Answer with a result in a correct  python dictionary that is properly formatted that contains the following keys and must have  values     
-              Goals containing 'body' that has multiple 'name', 'min', 'max', 'unit_name', 'option_array', 'name', 'min', 'max', 'unit_name', 'option_array', 'name', 'min', 'max', 'unit_name', 'option_array'
+              Answer with a result in a correct  python dictionary that is properly formatted that contains the keys and values. The structure should only contain top of the structure as result_type as "Personal Goal then following  under with goals under goal_name and Hydratation should not be there . After the dictionary output , don't explain anything or write 
             """
 
         self.init_pinecone(index_name=self.index)
         agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
         template = Template(prompt)
         output = template.render(factors=factors)
+        print("HERE IS THE AGENT SUMMARY", agent_summary)
+        print("HERE IS THE TEMPLATE", output)
         complete_query = str(agent_summary) + output
+        complete_query = PromptTemplate.from_template(complete_query)
         if model_speed =='fast':
             output = self.replicate_llm(output)
             return output
         else:
-            chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
-            chain_result = chain.run(prompt=complete_query, name=self.user_id).strip()
-            return chain_result
+            chain = LLMChain(llm=self.llm,  prompt=complete_query, verbose=self.verbose)
+            chain_result = chain.run( prompt=complete_query).strip()
+            print("RESULT IS ", chain_result)
+            json_data = json.dumps(chain_result)
+            return json_data
 
+    def sub_goal_generation(self, factors: dict, model_speed:str):
+        """Serves to generate sub goals for the user and drill down into it"""
 
-    def restaurant_recommendation(self, factors: dict):
-        """Serves to optimize agent goals"""
+        prompt = """
+            Based on all the history and information of this user, GOALS PROVIDED HERE  {% for factor in factors %} '{{ factor['name'] }}'{% if not loop.last %}, {% endif %}{% endfor %} 
+             provide a mind map representation of the secondary nodes that can be used to narrow down the choice better. Each of the results should have 4 sub nodes.
+            Answer with a result in a correct  python dictionary that is properly formatted that contains the following keys and must have  values
+            "Result type" should be "Sub Goal" ,  "body" which should contain goal_name and nested fields should contain 
+            sub_goal_name and the values should be shown as a range from 0 to 100, with a value chosen explicilty and shown based on the personal preferences of the user.  
+            After the dictionary output , don't explain anything or write 
+            """
+
+        self.init_pinecone(index_name=self.index)
+        agent_summary = self._fetch_memories(f"Users core summary", namespace="SUMMARY")
+        template = Template(prompt)
+        output = template.render(factors=factors)
+        print("HERE IS THE AGENT SUMMARY", agent_summary)
+        print("HERE IS THE TEMPLATE", output)
+        complete_query = str(agent_summary) + output
+        complete_query = PromptTemplate.from_template(complete_query)
+        if model_speed =='fast':
+            output = self.replicate_llm(output)
+            return output
+        else:
+            chain = LLMChain(llm=self.llm,  prompt=complete_query, verbose=self.verbose)
+            chain_result = chain.run( prompt=complete_query).strip()
+            print("RESULT IS ", chain_result)
+            json_data = json.dumps(chain_result)
+
+            return json_data
+
+    def extract_info(self, s):
+        name, address, phone, website = re.findall(r'^(.+)\nAddress: (.+)\nPhone: (.+)\nWebsite: (.+)\n$', s)[0]
+        return {
+            'name': name,
+            'address': address,
+            'phone': phone,
+            'website': website
+        }
+    def restaurant_generation(self, factors: dict, model_speed:str):
+        """Serves to suggest a restaurant to the agent"""
 
         prompt = """
               Based on the following factors, There are {% for factor, value in factors.items() %}'{{ factor }}'{% if not loop.last %}, {% endif %}{% endfor %} factors I want to consider.
                 {% for factor, value in factors.items() %}
+                For '{{ factor }}', I want the meal to be '{{ value }}' points on a scale of 1 to 100 points{% if not loop.last %}.{% else %}.{% endif %}
+                {% endfor %}
                 Determine the type of restaurant you should offer to a customer. Make the reccomendation very short and to a point, as if it is something you would type on google maps
             """
 
@@ -269,9 +350,21 @@ class Agent():
         template = Template(prompt)
         output = template.render(factors=factors)
         complete_query = str(agent_summary) + output
+        # print('HERE IS THE COMPLETE QUERY', complete_query)
+        complete_query = PromptTemplate.from_template(complete_query)
+        chain = LLMChain(llm=self.llm, prompt=complete_query, verbose=self.verbose)
+        chain_result = chain.run(prompt=complete_query).strip()
         places = GooglePlacesTool()
-        output = places.run(complete_query)
-        return output
+        output = places.run(chain_result)
+        import re
+        restaurants = re.split(r'\d+\.', output)[1:3]
+        # Create a list of dictionaries for each restaurant
+        restaurant_list = [self.extract_info(r) for r in restaurants]
+
+        # Convert the list of dictionaries to JSON
+        json_output = json.dumps(restaurant_list)
+        print('HERE IS THE OUTPUT', json_output)
+        return json_output
 
     def delivery_recommendation(self, factors: dict, model_speed:str):
         """Serves to optimize agent goals"""
@@ -310,7 +403,7 @@ class Agent():
 
 if __name__ == "__main__":
     agent = Agent()
-    agent.test_places()
+    agent.goal_optimization(factors={}, model_speed="slow")
     # agent._update_memories("lazy, stupid and hungry", "TRAITS")
     #agent.task_identification("I need your help choosing what to eat for my next meal. ")
     # agent.solution_generation( {    'health': 85,

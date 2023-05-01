@@ -18,12 +18,12 @@ def can_import(module_name):
     except ImportError:
         return False
 
-AGENT_NAME = os.getenv("AGENT_NAME") or "my-agent"
-
-agent = Agent(AGENT_NAME)
-
-# Creates Pinecone Index
-agent.createIndex()
+# AGENT_NAME = os.getenv("AGENT_NAME") or "my-agent"
+#
+# agent = Agent(AGENT_NAME)
+#
+# # Creates Pinecone Index
+# agent.createIndex()
 # API Keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is missing from .env"
